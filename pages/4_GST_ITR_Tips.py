@@ -20,7 +20,7 @@ PLOTLY_LAYOUT = dict(
     margin=dict(l=8, r=8, t=36, b=8),
 )
 
-st.markdown(page_title("📋", "GST & ITR Tips",
+st.markdown(page_title("", "GST & ITR Tips",
     "Deadlines · Penalties · Regime comparison · GST slabs"),
     unsafe_allow_html=True)
 
@@ -38,7 +38,7 @@ installments = [
     {"label": "4th Instalment",  "date": "15 Mar 2026",  "pct": 100, "month_num": 12},
 ]
 
-colors_bar = ["#1d3a2a", "#00804a", "#00b85c", "#00e676"]
+colors_bar = ["#0d1a33", "#1a3a7a", "#3a75e0", "#4f8ef7"]
 
 fig_timeline = go.Figure()
 
@@ -107,7 +107,7 @@ st.markdown(section_header("Interest Penalties", "Sections 234B and 234C"),
 col1, col2 = st.columns(2)
 with col1:
     st.markdown(card("""
-    <div style="color:#00e676;font-weight:700;font-size:13px;margin-bottom:.6rem;">
+    <div style="color:#4f8ef7;font-weight:700;font-size:13px;margin-bottom:.6rem;">
         Section 234B — Default in Advance Tax
     </div>
     <p style="color:#9aaac4;font-size:13px;margin:0 0 .6rem 0;">
@@ -118,14 +118,14 @@ with col1:
         <b style="color:#f0f4ff;">Rate:</b> 1% per month on the shortfall.
     </p>
     <code style="font-size:11px;background:#0f1117;padding:.4rem .7rem;
-                 border-radius:6px;display:block;color:#00e676;">
+                 border-radius:6px;display:block;color:#4f8ef7;">
         Interest = 1% × Shortfall × Months
     </code>
     """), unsafe_allow_html=True)
 
 with col2:
     st.markdown(card("""
-    <div style="color:#00e676;font-weight:700;font-size:13px;margin-bottom:.6rem;">
+    <div style="color:#4f8ef7;font-weight:700;font-size:13px;margin-bottom:.6rem;">
         Section 234C — Deferred Installments
     </div>
     <p style="color:#9aaac4;font-size:13px;margin:0 0 .6rem 0;">
@@ -137,7 +137,7 @@ with col2:
         (last installment: 1 month).
     </p>
     <code style="font-size:11px;background:#0f1117;padding:.4rem .7rem;
-                 border-radius:6px;display:block;color:#00e676;">
+                 border-radius:6px;display:block;color:#4f8ef7;">
         Interest = 1% × Shortfall × 3 months
     </code>
     """), unsafe_allow_html=True)

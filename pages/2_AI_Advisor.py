@@ -39,7 +39,7 @@ if "chat_history" not in st.session_state or not isinstance(st.session_state.cha
     st.session_state.chat_history = []
 
 # ── Page header ───────────────────────────────────────────────────────────────
-st.markdown(page_title("🤖", "AI Tax Advisor",
+st.markdown(page_title("", "AI Tax Advisor",
     "Powered by Groq · Context-aware Indian tax advice for FY 2026"),
     unsafe_allow_html=True)
 
@@ -80,7 +80,7 @@ st.markdown("<div style='height:.8rem'></div>", unsafe_allow_html=True)
 st.markdown("""
 <div style="background:#171c27;border:1px solid #252d3d;border-left:3px solid #ffab40;
             border-radius:10px;padding:.8rem 1.2rem;margin-bottom:1rem;">
-    <span style="color:#ffab40;font-weight:600;font-size:12px;">⚠ DISCLAIMER</span>
+    <span style="color:#ffab40;font-weight:600;font-size:12px;"> DISCLAIMER</span>
     <span style="color:#5a6a85;font-size:12px;margin-left:.5rem;">
         AI-generated advice. Verify with a qualified CA for legal compliance.
     </span>

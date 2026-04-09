@@ -22,7 +22,7 @@ PLOTLY_LAYOUT = dict(
     legend=dict(bgcolor="rgba(0,0,0,0)", borderwidth=0, font=dict(size=11)),
 )
 
-st.markdown(page_title("📈", "Predictive Planning",
+st.markdown(page_title("", "Predictive Planning",
     "Year-end projection based on your transaction history"), unsafe_allow_html=True)
 
 monthly = get_monthly_totals(st.session_state.user_id)
@@ -31,7 +31,7 @@ if not monthly:
     st.markdown("""
     <div style="background:#111827;border:1px dashed #1e2a3d;border-radius:16px;
                 padding:3rem;text-align:center;margin-top:1rem;">
-        <div style="font-size:2rem;margin-bottom:.6rem;">📊</div>
+        <div style="font-size:2rem;margin-bottom:.6rem;"></div>
         <div style="font-family:'Syne',sans-serif;font-weight:700;color:#edf2ff;">
             No transaction data yet
         </div>
@@ -59,7 +59,7 @@ k1, k2, k3, k4 = st.columns(4)
 eff = (tax_result["total_tax_payable"] / projected_annual_inc * 100) if projected_annual_inc else 0
 with k1:
     st.markdown(stat_card("Projected Income", format_inr(projected_annual_inc),
-                          f"Avg {format_inr(avg_monthly_income)}/mo", "var(--green)"), unsafe_allow_html=True)
+                          f"Avg {format_inr(avg_monthly_income)}/mo", "var(--navy)"), unsafe_allow_html=True)
 with k2:
     st.markdown(stat_card("Projected Expenses", format_inr(projected_annual_exp),
                           f"Avg {format_inr(avg_monthly_expense)}/mo", "var(--red)"), unsafe_allow_html=True)
@@ -81,10 +81,10 @@ fig_line.add_trace(go.Scatter(
     x=df["month"], y=df["income"],
     name="Income",
     mode="lines+markers",
-    line=dict(color="#00e676", width=2.5),
-    marker=dict(size=8, color="#00e676", line=dict(color="#0b0f1a", width=2)),
+    line=dict(color="#4f8ef7", width=2.5),
+    marker=dict(size=8, color="#4f8ef7", line=dict(color="#0b0f1a", width=2)),
     fill="tozeroy",
-    fillcolor="rgba(0,230,118,0.07)",
+    fillcolor="rgba(79,142,247,0.07)",
     hovertemplate="<b>%{x}</b><br>Income: Rs. %{y:,.0f}<extra></extra>",
 ))
 fig_line.add_trace(go.Scatter(
@@ -100,7 +100,7 @@ fig_line.add_trace(go.Scatter(
 # Projected average line
 fig_line.add_hline(
     y=avg_monthly_income, line_dash="dot",
-    line_color="#00e676", line_width=1, opacity=0.4,
+    line_color="#4f8ef7", line_width=1, opacity=0.4,
     annotation_text=f"Avg income: {format_inr(avg_monthly_income)}",
     annotation_font=dict(size=10, color="#4a5a72"),
 )
@@ -118,7 +118,7 @@ ch3, ch4 = st.columns(2)
 with ch3:
     st.markdown(section_header("Monthly Net Savings", "Income minus expenses"), unsafe_allow_html=True)
     df["net"] = df["income"] - df["expense"]
-    bar_colors = ["#00e676" if v >= 0 else "#ff5252" for v in df["net"]]
+    bar_colors = ["#4f8ef7" if v >= 0 else "#ff5252" for v in df["net"]]
 
     fig_net = go.Figure(go.Bar(
         x=df["month"], y=df["net"],
@@ -139,8 +139,8 @@ with ch3:
 with ch4:
     st.markdown(section_header("Cumulative Savings", "Running total over time"), unsafe_allow_html=True)
     df["cumulative"] = df["net"].cumsum()
-    cum_color = "#00e676" if df["cumulative"].iloc[-1] >= 0 else "#ff5252"
-    cum_fill  = "rgba(0,230,118,0.07)" if df["cumulative"].iloc[-1] >= 0 else "rgba(255,82,82,0.07)"
+    cum_color = "#4f8ef7" if df["cumulative"].iloc[-1] >= 0 else "#ff5252"
+    cum_fill  = "rgba(79,142,247,0.07)" if df["cumulative"].iloc[-1] >= 0 else "rgba(255,82,82,0.07)"
 
     fig_cum = go.Figure(go.Scatter(
         x=df["month"], y=df["cumulative"],

@@ -10,7 +10,7 @@ if not st.session_state.get("logged_in"):
 inject_theme()
 render_sidebar()
 
-st.markdown(page_title("🧠", "Why TaxMind",
+st.markdown(page_title("", "Why TaxMind",
     "Built exclusively for FY 2026 Indian taxpayers"),
     unsafe_allow_html=True)
 
@@ -42,27 +42,27 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 features = [
-    ("🎯", "Built exclusively for FY 2026 Indian tax rules",
+    ("", "Built exclusively for FY 2026 Indian tax rules",
      "Tax engine coded precisely to new regime slabs, Rs. 75,000 standard deduction, "
      "Section 87A rebate ceiling of Rs. 60,000, and 4% cess — not a generic calculator "
      "with an India filter."),
-    ("🤖", "AI advisor that knows your financial context",
+    ("", "AI advisor that knows your financial context",
      "Every AI query silently passes your employment type, income bracket, preferred regime, "
      "recorded income, and estimated tax. Advice calibrated to your situation."),
-    ("🏷️", "Automatic transaction categorisation",
+    ("", "Automatic transaction categorisation",
      "Every transaction is categorised by keyword matching — Zomato → Food, IRCTC → Transport, "
      "SIP → Investment. No manual tagging required."),
-    ("📈", "Predictive planning before year-end surprises",
+    ("", "Predictive planning before year-end surprises",
      "Monthly income and expense trends are projected forward to estimate full-year tax liability. "
      "Act before March scrambles."),
-    ("⏰", "Advance tax and penalty awareness built in",
+    ("", "Advance tax and penalty awareness built in",
      "Deadlines, installment percentages, and Sections 234B & 234C costs are all in one place."),
-    ("📄", "Export-ready computations",
+    ("", "Export-ready computations",
      "Tax computation exportable as a formatted PDF or CSV — ready to share with your CA."),
-    ("🔒", "Privacy-first local storage",
+    ("", "Privacy-first local storage",
      "On the free tier, data lives in a local SQLite file, never shared with third parties. "
      "Pro and Enterprise use encrypted cloud-backed storage."),
-    ("🧘", "Minimalist, professional design — no noise",
+    ("", "Minimalist, professional design — no noise",
      "No gamification. No confetti. No dark patterns. A clean tool that works."),
 ]
 
@@ -95,16 +95,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 segments = [
-    ("👔", "Salaried professionals",
+    ("", "Salaried professionals",
      "Understand take-home after tax, verify Form 16, decide old vs new regime, "
      "and plan NPS contributions to maximise 80CCD(2)."),
-    ("💻", "Freelancers and consultants",
+    ("", "Freelancers and consultants",
      "Track income across clients, understand advance tax obligations, "
      "and monitor GST registration thresholds."),
-    ("🏢", "Small business owners",
+    ("", "Small business owners",
      "Monitor monthly cash flow, auto-categorise expenses, and ask regime-specific "
      "deduction questions without scheduling a CA appointment."),
-    ("📝", "First-time ITR filers",
+    ("", "First-time ITR filers",
      "The AI advisor walks you through which ITR form applies, what documents you need, "
      "and what deductions you may be missing."),
 ]

@@ -21,10 +21,10 @@ PLOTLY_LAYOUT = dict(
     legend=dict(bgcolor="rgba(0,0,0,0)", borderwidth=0, font=dict(size=11)),
 )
 
-PALETTE = ["#00e676","#00b85c","#ffab40","#ff5252","#40c4ff",
+PALETTE = ["#4f8ef7","#3a75e0","#ffab40","#ff5252","#40c4ff",
            "#ea80fc","#ff80ab","#b9f6ca","#ffd180","#84ffff"]
 
-st.markdown(page_title("💳", "Expenses", "Auto-categorised spend overview"), unsafe_allow_html=True)
+st.markdown(page_title("", "Expenses", "Auto-categorised spend overview"), unsafe_allow_html=True)
 
 expenses = get_transactions(st.session_state.user_id, txn_type="expense")
 
@@ -32,7 +32,7 @@ if not expenses:
     st.markdown("""
     <div style="background:#111827;border:1px dashed #1e2a3d;border-radius:16px;
                 padding:3rem;text-align:center;margin-top:1rem;">
-        <div style="font-size:2rem;margin-bottom:.6rem;">💸</div>
+        <div style="font-size:2rem;margin-bottom:.6rem;"></div>
         <div style="font-family:'Syne',sans-serif;font-weight:700;color:#edf2ff;">
             No expense transactions yet
         </div>
@@ -53,7 +53,7 @@ k1, k2, k3 = st.columns(3)
 with k1:
     st.markdown(stat_card("Total Spent", f"Rs. {total_expense:,.0f}", "All time", "var(--red)"), unsafe_allow_html=True)
 with k2:
-    st.markdown(stat_card("Categories", str(len(category_totals)), "Detected", "var(--green)"), unsafe_allow_html=True)
+    st.markdown(stat_card("Categories", str(len(category_totals)), "Detected", "var(--navy)"), unsafe_allow_html=True)
 with k3:
     st.markdown(stat_card("Top Category", top_category, f"Rs. {category_totals.iloc[0]:,.0f}", "var(--amber)"), unsafe_allow_html=True)
 
@@ -90,7 +90,7 @@ with ch2:
     st.markdown(section_header("Category Bars", "Spend per category"), unsafe_allow_html=True)
     cat_sorted = category_totals.sort_values()
     n = len(cat_sorted)
-    bar_colors = PALETTE[:n][::-1] if n <= len(PALETTE) else ["#00e676"] * n
+    bar_colors = PALETTE[:n][::-1] if n <= len(PALETTE) else ["#4f8ef7"] * n
 
     fig_bar = go.Figure(go.Bar(
         x=cat_sorted.values,

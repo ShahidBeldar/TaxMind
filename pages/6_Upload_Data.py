@@ -13,10 +13,10 @@ if not st.session_state.get("logged_in"):
 inject_theme()
 render_sidebar()
 
-st.markdown(page_title("⬆️", "Upload Data", "Add transactions manually or import via CSV"),
+st.markdown(page_title("⬆", "Upload Data", "Add transactions manually or import via CSV"),
             unsafe_allow_html=True)
 
-tab_manual, tab_csv = st.tabs(["✏️  Manual Entry", "📄  CSV Import"])
+tab_manual, tab_csv = st.tabs(["  Manual Entry", "  CSV Import"])
 
 # ── Manual entry ──────────────────────────────────────────────────────────────
 with tab_manual:
@@ -49,7 +49,7 @@ with tab_manual:
                 amount=amount,
                 txn_type=txn_type,
             )
-            st.success(f"✅  {txn_type.capitalize()} of Rs. {amount:,.2f} added and auto-categorised.")
+            st.success(f"  {txn_type.capitalize()} of Rs. {amount:,.2f} added and auto-categorised.")
 
 # ── CSV Import ────────────────────────────────────────────────────────────────
 with tab_csv:
@@ -62,7 +62,7 @@ with tab_csv:
         <p style="color:#9aaac4;font-size:13px;margin:0 0 .4rem 0;font-weight:600;">
             Required columns:
         </p>
-        <code style="font-size:12px;color:#00e676;">date, description, amount, type</code>
+        <code style="font-size:12px;color:#4f8ef7;">date, description, amount, type</code>
         <p style="color:#5a6a85;font-size:12px;margin:.5rem 0 0 0;">
             • <b>date</b> in YYYY-MM-DD format<br>
             • <b>type</b> must be <code>income</code> or <code>expense</code><br>
@@ -90,9 +90,9 @@ with tab_csv:
                     st.warning("No valid rows found after validation. Check your file.")
                 else:
                     st.markdown(f"""
-                    <div style="background:#0d2018;border:1px solid #00e676;border-radius:10px;
+                    <div style="background:#0d1a33;border:1px solid #4f8ef7;border-radius:10px;
                                 padding:.7rem 1.2rem;margin:.5rem 0;">
-                        <span style="color:#00e676;font-weight:700;">{len(df)}</span>
+                        <span style="color:#4f8ef7;font-weight:700;">{len(df)}</span>
                         <span style="color:#9aaac4;font-size:13px;"> valid rows detected — preview below</span>
                     </div>
                     """, unsafe_allow_html=True)

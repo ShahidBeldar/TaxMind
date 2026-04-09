@@ -96,7 +96,7 @@ def build_pdf(result: dict, slabs: list[dict], employment_type: str) -> bytes:
 employment_type  = st.session_state.get("employment_type", "Salaried") or "Salaried"
 preferred_regime = st.session_state.get("preferred_regime", "new") or "new"
 
-st.markdown(page_title("📊", "Tax Dashboard",
+st.markdown(page_title("", "Tax Dashboard",
     f"Employment: {employment_type} · Regime: {'New' if preferred_regime == 'new' else 'Old'} · FY 2026"),
     unsafe_allow_html=True)
 
@@ -122,7 +122,7 @@ if calc_clicked and gross_income > 0:
         ("Gross Income",   format_inr(result["gross_income"]),      "Before deductions",     "var(--text-md)"),
         ("Taxable Income", format_inr(result["taxable_income"]),    "After std. deduction",  "var(--amber)"),
         ("Tax Payable",    format_inr(result["total_tax_payable"]), "Incl. 4% cess",         "var(--red)"),
-        ("Effective Rate", f"{eff_rate:.1f}%",                      "Of gross income",        "var(--green)"),
+        ("Effective Rate", f"{eff_rate:.1f}%",                      "Of gross income",        "var(--navy)"),
     ]
     for col, (lbl, val, sub, accent) in zip([k1, k2, k3, k4], kpis):
         with col:
@@ -138,7 +138,7 @@ if calc_clicked and gross_income > 0:
         take_home = result["gross_income"] - result["total_tax_payable"]
         labels  = ["Take-Home", "Tax (after rebate)", "Cess"]
         values  = [take_home, result["tax_after_rebate"], result["cess"]]
-        colours = ["#00e676", "#ff5252", "#ffab40"]
+        colours = ["#4f8ef7", "#ff5252", "#ffab40"]
 
         fig_donut = go.Figure(go.Pie(
             labels=labels, values=values,
@@ -189,7 +189,7 @@ if calc_clicked and gross_income > 0:
             textposition="outside",
             textfont=dict(size=10, color="#8899b8", family="DM Mono"),
             connector=dict(line=dict(color="#273347", width=1, dash="dot")),
-            increasing=dict(marker=dict(color="#00e676", line=dict(width=0))),
+            increasing=dict(marker=dict(color="#4f8ef7", line=dict(width=0))),
             decreasing=dict(marker=dict(color="#ff5252", line=dict(width=0))),
             totals=dict(marker=dict(color="#40c4ff", line=dict(width=0))),
             hovertemplate="<b>%{x}</b><br>Rs. %{y:,.0f}<extra></extra>",
@@ -214,7 +214,7 @@ if calc_clicked and gross_income > 0:
                 for s in slab_df["Slab"]
             ]
             non_zero = slab_df["Tax (Rs.)"] > 0
-            bar_colors = ["#00e676" if nz else "#1e2a3d" for nz in non_zero]
+            bar_colors = ["#4f8ef7" if nz else "#1e2a3d" for nz in non_zero]
 
             fig_slab = go.Figure(go.Bar(
                 x=short_labels,
@@ -240,18 +240,18 @@ if calc_clicked and gross_income > 0:
             number=dict(suffix="%", font=dict(size=28, color="#edf2ff", family="DM Mono")),
             delta=dict(reference=30, valueformat=".1f",
                        increasing=dict(color="#ff5252"),
-                       decreasing=dict(color="#00e676")),
+                       decreasing=dict(color="#4f8ef7")),
             gauge=dict(
                 axis=dict(range=[0, 40], tickwidth=1, tickcolor="#273347",
                           tickfont=dict(size=10, color="#4a5a72")),
-                bar=dict(color="#00e676", thickness=0.22),
+                bar=dict(color="#4f8ef7", thickness=0.22),
                 bgcolor="rgba(0,0,0,0)",
                 borderwidth=0,
                 steps=[
-                    dict(range=[0, 5],  color="#0d2018"),
-                    dict(range=[5, 15], color="#112a1e"),
-                    dict(range=[15, 25],color="#1a2e1a"),
-                    dict(range=[25, 40],color="#2a1a1a"),
+                    dict(range=[0, 5],  color="#0d1526"),
+                    dict(range=[5, 15], color="#0d1a33"),
+                    dict(range=[15, 25],color="#152240"),
+                    dict(range=[25, 40],color="#1e1a2e"),
                 ],
                 threshold=dict(line=dict(color="#ffab40", width=2), thickness=0.75, value=30),
             ),
@@ -302,7 +302,7 @@ else:
         background:#111827;border:1px dashed #1e2a3d;border-radius:16px;
         padding:3rem;text-align:center;margin-top:1rem;
     ">
-        <div style="font-size:2rem;margin-bottom:.6rem;">📥</div>
+        <div style="font-size:2rem;margin-bottom:.6rem;"></div>
         <div style="font-family:'Syne',sans-serif;font-weight:700;color:#edf2ff;font-size:1rem;">
             Enter your gross income above
         </div>

@@ -11,7 +11,7 @@ if not st.session_state.get("logged_in"):
 inject_theme()
 render_sidebar()
 
-st.markdown(page_title("💰", "Pricing", "Simple, transparent plans for every taxpayer"),
+st.markdown(page_title("", "Pricing", "Simple, transparent plans for every taxpayer"),
             unsafe_allow_html=True)
 
 # ── Pricing cards ─────────────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ plans = [
         "price":   "Rs. 499",
         "period":  "/ month",
         "badge":   "POPULAR",
-        "accent":  "#00e676",
+        "accent":  "#4f8ef7",
         "features": [
             ("Tax Calculator (New Regime)", True),
             ("AI Tax Advisor — Unlimited", True),
@@ -86,8 +86,8 @@ for col, plan in zip(cols, plans):
         features_html = "".join([
             f"""<div style="display:flex;align-items:center;gap:.5rem;
                             padding:.35rem 0;border-bottom:1px solid #1d2333;">
-                <span style="color:{'#00e676' if ok else '#252d3d'};font-size:1rem;">
-                    {'✓' if ok else '✕'}
+                <span style="color:{'#4f8ef7' if ok else '#252d3d'};font-size:1rem;">
+                    {'' if ok else ''}
                 </span>
                 <span style="color:{'#9aaac4' if ok else '#3a4a5e'};font-size:12.5px;">
                     {feat}
@@ -126,6 +126,6 @@ st.markdown("""
 <p style="color:#5a6a85;font-size:12px;text-align:center;">
     All plans billed monthly · No long-term contracts · GST applicable on paid plans<br>
     Enterprise for teams of 10+ · Contact <a href="mailto:enterprise@taxmind.ai"
-    style="color:#00e676;text-decoration:none;">enterprise@taxmind.ai</a>
+    style="color:#4f8ef7;text-decoration:none;">enterprise@taxmind.ai</a>
 </p>
 """, unsafe_allow_html=True)
