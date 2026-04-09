@@ -2,36 +2,38 @@ import streamlit as st
 import pandas as pd
 from utils.i18n import t
 from utils.db import insert_transaction, bulk_insert_transactions
+from utils.theme import inject_theme, page_title, section_header
 
-# ---------------------------------------------------------------------------
-# Auth guard
-# ---------------------------------------------------------------------------
+# ── Auth guard ────────────────────────────────────────────────────────────────
 if not st.session_state.get("logged_in"):
     st.warning("Please log in to access this page.")
     st.stop()
 
-# ---------------------------------------------------------------------------
-# Page layout
-# ---------------------------------------------------------------------------
-st.title(t("upload_title"))
-st.write("---")
+inject_theme()
 
-tab_manual, tab_csv = st.tabs([t("manual_entry"), t("csv_upload")])
+st.markdown(page_title("⬆️", "Upload Data", "Add transactions manually or import via CSV"),
+            unsafe_allow_html=True)
 
-# ---------------------------------------------------------------------------
-# Section A — Manual Entry
-# ---------------------------------------------------------------------------
+tab_manual, tab_csv = st.tabs(["✏️  Manual Entry", "📄  CSV Import"])
+
+# ── Manual entry ──────────────────────────────────────────────────────────────
 with tab_manual:
-    st.subheader(t("manual_entry"))
+    st.markdown("<div style='height:.6rem'></div>", unsafe_allow_html=True)
+    st.markdown(section_header("Add a Transaction"), unsafe_allow_html=True)
 
-    date        = st.date_input(t("date_label"), key="manual_date")
+    col_date, col_type = st.columns(2)
+    with col_date:
+        date = st.date_input(t("date_label"), key="manual_date")
+    with col_type:
+        txn_type = st.selectbox(t("type_label"), options=["expense", "income"],
+                                format_func=lambda x: x.capitalize(), key="manual_type")
+
     description = st.text_input(t("description_label"), key="manual_desc",
-                                placeholder="e.g. Zomato dinner, Salary credited")
-    amount      = st.number_input(t("amount_label"), min_value=0.0, step=100.0,
-                                  format="%.2f", key="manual_amount")
-    txn_type    = st.selectbox(t("type_label"), options=["expense", "income"],
-                               format_func=lambda x: x.capitalize(), key="manual_type")
+                                placeholder="e.g. Zomato dinner, Salary credited, SIP Groww")
+    amount = st.number_input(t("amount_label"), min_value=0.0, step=100.0,
+                             format="%.2f", key="manual_amount")
 
+    st.markdown("<div style='height:.3rem'></div>", unsafe_allow_html=True)
     if st.button(t("add_transaction"), use_container_width=True, key="btn_add"):
         if amount <= 0:
             st.error("Amount must be greater than zero.")
@@ -45,22 +47,27 @@ with tab_manual:
                 amount=amount,
                 txn_type=txn_type,
             )
-            st.success(t("transaction_added"))
+            st.success(f"✅  {txn_type.capitalize()} of Rs. {amount:,.2f} added and auto-categorised.")
 
-# ---------------------------------------------------------------------------
-# Section B — CSV Upload
-# ---------------------------------------------------------------------------
+# ── CSV Import ────────────────────────────────────────────────────────────────
 with tab_csv:
-    st.subheader(t("csv_upload"))
-    st.write(
-        "Upload a CSV file with the following columns: "
-        "`date`, `description`, `amount`, `type`"
-    )
-    st.caption(
-        "The `type` column must be either `income` or `expense`. "
-        "The `date` column should be in YYYY-MM-DD format. "
-        "The categorizer will automatically tag each transaction."
-    )
+    st.markdown("<div style='height:.6rem'></div>", unsafe_allow_html=True)
+    st.markdown(section_header("Import CSV"), unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="background:#171c27;border:1px solid #252d3d;border-radius:12px;
+                padding:1rem 1.4rem;margin-bottom:1rem;">
+        <p style="color:#9aaac4;font-size:13px;margin:0 0 .4rem 0;font-weight:600;">
+            Required columns:
+        </p>
+        <code style="font-size:12px;color:#00e676;">date, description, amount, type</code>
+        <p style="color:#5a6a85;font-size:12px;margin:.5rem 0 0 0;">
+            • <b>date</b> in YYYY-MM-DD format<br>
+            • <b>type</b> must be <code>income</code> or <code>expense</code><br>
+            • Transactions are automatically categorised from description
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     uploaded_file = st.file_uploader(t("upload_csv"), type=["csv"], key="csv_uploader")
 
@@ -71,7 +78,7 @@ with tab_csv:
 
             required = {"date", "description", "amount", "type"}
             if not required.issubset(set(df.columns)):
-                st.error(t("csv_error"))
+                st.error(f"Missing columns. Required: {', '.join(required)}")
             else:
                 df = df[list(required)].dropna(subset=["amount", "type"])
                 df["type"] = df["type"].str.strip().str.lower()
@@ -80,10 +87,17 @@ with tab_csv:
                 if df.empty:
                     st.warning("No valid rows found after validation. Check your file.")
                 else:
-                    st.write(f"Preview — {len(df)} valid rows found:")
+                    st.markdown(f"""
+                    <div style="background:#0d2018;border:1px solid #00e676;border-radius:10px;
+                                padding:.7rem 1.2rem;margin:.5rem 0;">
+                        <span style="color:#00e676;font-weight:700;">{len(df)}</span>
+                        <span style="color:#9aaac4;font-size:13px;"> valid rows detected — preview below</span>
+                    </div>
+                    """, unsafe_allow_html=True)
                     st.dataframe(df.head(10), use_container_width=True)
 
-                    if st.button("Import All Transactions", use_container_width=True):
+                    st.markdown("<div style='height:.3rem'></div>", unsafe_allow_html=True)
+                    if st.button("Import All Transactions →", use_container_width=True):
                         rows = df.to_dict(orient="records")
                         n = bulk_insert_transactions(st.session_state.user_id, rows)
                         st.success(t("csv_success", n=n))
