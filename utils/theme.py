@@ -1,6 +1,7 @@
 """
 TaxMind AI — Shared dark-mode theme injector.
 Navy palette. No emojis. Production-ready.
+FIXED: input visibility, button text color, sidebar wildcard bleed.
 """
 import streamlit as st
 
@@ -14,7 +15,7 @@ _CSS = """
     --bg-card2:    #111d33;
     --bg-card3:    #152240;
     --border:      #1c2d4a;
-    --border-hi:   #243858;
+    --border-hi:   #2a4068;
     --navy:        #4f8ef7;
     --navy-dim:    #3a75e0;
     --navy-bright: #7aabff;
@@ -48,7 +49,7 @@ header[data-testid="stHeader"] {
 }
 #MainMenu, footer { visibility: hidden; }
 
-/* ── NUKE NATIVE STREAMLIT NAV — every known selector ── */
+/* ── NUKE NATIVE STREAMLIT NAV ── */
 [data-testid="stSidebarNav"],
 [data-testid="stSidebarNavItems"],
 [data-testid="stSidebarNavSeparator"],
@@ -65,7 +66,7 @@ div[class*="sidebarNav"] {
     visibility: hidden !important;
 }
 
-/* ── Sidebar shell ── */
+/* ── Sidebar shell — NO wildcard * color rule ── */
 [data-testid="stSidebar"] {
     background: var(--bg-card) !important;
     border-right: 1px solid var(--border) !important;
@@ -75,7 +76,14 @@ div[class*="sidebarNav"] {
 [data-testid="stSidebar"] > div:first-child {
     padding: 0 !important;
 }
-[data-testid="stSidebar"] * { color: var(--text-hi) !important; }
+
+/* Sidebar text — targeted, not wildcard */
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] div,
+[data-testid="stSidebar"] label {
+    color: var(--text-hi);
+}
 
 /* ── Nav buttons in sidebar ── */
 [data-testid="stSidebar"] .stButton > button {
@@ -100,12 +108,8 @@ div[class*="sidebarNav"] {
     transform: none !important;
     box-shadow: none !important;
 }
-
-/* Logout button hover — red tint */
-[data-testid="stSidebar"] .stButton[data-testid*="logout"] > button:hover,
-[data-testid="stSidebar"] .element-container:has(button[kind*="logout"]) button:hover {
-    background: var(--red-glow) !important;
-    color: var(--red) !important;
+[data-testid="stSidebar"] .stButton > button p {
+    color: inherit !important;
 }
 
 /* ── Sidebar selectbox ── */
@@ -154,33 +158,88 @@ small, .stCaption, [data-testid="stCaptionContainer"] * {
     font-size: 1.45rem !important;
 }
 
-/* ── Inputs ── */
-.stTextInput input, .stNumberInput input,
-.stSelectbox select, .stDateInput input, textarea {
-    background: var(--bg-card2) !important;
-    border: 1px solid var(--border-hi) !important;
+/* ── Inputs — updated selectors for modern Streamlit ── */
+/* Text inputs */
+.stTextInput > div > div > input {
+    background: #111d33 !important;
+    border: 1.5px solid #2a4068 !important;
     border-radius: var(--radius) !important;
-    color: var(--text-hi) !important;
+    color: #e8eeff !important;
     font-family: var(--font-body) !important;
+    font-size: 14px !important;
+    padding: 0.5rem 0.75rem !important;
     transition: var(--transition) !important;
 }
-.stTextInput input:focus, .stNumberInput input:focus {
+.stTextInput > div > div > input:focus {
     border-color: var(--navy) !important;
-    box-shadow: 0 0 0 2px var(--navy-glow) !important;
+    box-shadow: 0 0 0 2px rgba(79,142,247,0.2) !important;
+    outline: none !important;
 }
-label, .stSelectbox label, .stTextInput label,
-.stNumberInput label, .stDateInput label {
+.stTextInput > div > div > input::placeholder {
+    color: #3d5070 !important;
+}
+
+/* Number inputs */
+.stNumberInput > div > div > input {
+    background: #111d33 !important;
+    border: 1.5px solid #2a4068 !important;
+    border-radius: var(--radius) !important;
+    color: #e8eeff !important;
+    font-family: var(--font-body) !important;
+}
+.stNumberInput > div > div > input:focus {
+    border-color: var(--navy) !important;
+    box-shadow: 0 0 0 2px rgba(79,142,247,0.2) !important;
+}
+
+/* Selectbox */
+.stSelectbox > div > div {
+    background: #111d33 !important;
+    border: 1.5px solid #2a4068 !important;
+    border-radius: var(--radius) !important;
+    color: #e8eeff !important;
+}
+.stSelectbox [data-baseweb="select"] > div {
+    background: #111d33 !important;
+    border-color: #2a4068 !important;
+    color: #e8eeff !important;
+}
+
+/* Date input */
+.stDateInput > div > div > input {
+    background: #111d33 !important;
+    border: 1.5px solid #2a4068 !important;
+    border-radius: var(--radius) !important;
+    color: #e8eeff !important;
+}
+
+/* Textarea */
+textarea {
+    background: #111d33 !important;
+    border: 1.5px solid #2a4068 !important;
+    border-radius: var(--radius) !important;
+    color: #e8eeff !important;
+    font-family: var(--font-body) !important;
+}
+
+/* Input labels */
+.stTextInput label,
+.stNumberInput label,
+.stSelectbox label,
+.stDateInput label,
+.stTextArea label {
     color: var(--text-md) !important;
     font-size: 13px !important;
     font-weight: 500 !important;
     letter-spacing: 0.02em !important;
 }
 
-/* ── Primary button (main area only) ── */
+/* ── PRIMARY BUTTONS — main area ── */
+/* This targets ALL buttons in main content with correct text color */
 .main .stButton > button,
 [data-testid="stMainBlockContainer"] .stButton > button {
     background: var(--navy) !important;
-    color: #08101f !important;
+    color: #ffffff !important;          /* WHITE — clearly visible on blue */
     font-family: var(--font-head) !important;
     font-weight: 700 !important;
     font-size: 13.5px !important;
@@ -194,12 +253,20 @@ label, .stSelectbox label, .stTextInput label,
 .main .stButton > button:hover,
 [data-testid="stMainBlockContainer"] .stButton > button:hover {
     background: var(--navy-dim) !important;
+    color: #ffffff !important;
     transform: translateY(-1px) !important;
     box-shadow: 0 6px 22px var(--navy-glow) !important;
 }
 .main .stButton > button:active,
 [data-testid="stMainBlockContainer"] .stButton > button:active {
     transform: translateY(0) !important;
+}
+
+/* Button inner <p> tag fix — Streamlit wraps text in p */
+.main .stButton > button p,
+[data-testid="stMainBlockContainer"] .stButton > button p {
+    color: #ffffff !important;
+    font-weight: 700 !important;
 }
 
 /* ── Download button ── */
@@ -214,6 +281,22 @@ label, .stSelectbox label, .stTextInput label,
 }
 .stDownloadButton > button:hover {
     background: var(--navy-glow) !important;
+}
+
+/* ── Tabs ── */
+[data-testid="stTabs"] [role="tab"] {
+    color: var(--text-lo) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 500;
+    font-size: 13px;
+}
+[data-testid="stTabs"] [role="tab"][aria-selected="true"] {
+    color: var(--navy) !important;
+    border-bottom-color: var(--navy) !important;
+}
+/* Tab button text */
+[data-testid="stTabs"] [role="tab"] p {
+    color: inherit !important;
 }
 
 /* ── Tables ── */
@@ -243,18 +326,6 @@ label, .stSelectbox label, .stTextInput label,
     border: 1px solid var(--border) !important;
     border-radius: var(--radius) !important;
     overflow: hidden !important;
-}
-
-/* ── Tabs ── */
-[data-testid="stTabs"] [role="tab"] {
-    color: var(--text-lo) !important;
-    font-family: var(--font-body) !important;
-    font-weight: 500;
-    font-size: 13px;
-}
-[data-testid="stTabs"] [role="tab"][aria-selected="true"] {
-    color: var(--navy) !important;
-    border-bottom-color: var(--navy) !important;
 }
 
 /* ── Alerts ── */
@@ -300,6 +371,22 @@ code, pre {
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
+
+/* ── BaseWeb / Emotion overrides for dropdowns ── */
+[data-baseweb="popover"] {
+    background: #111d33 !important;
+    border: 1px solid #2a4068 !important;
+}
+[data-baseweb="menu"] {
+    background: #111d33 !important;
+}
+[data-baseweb="option"] {
+    background: #111d33 !important;
+    color: #e8eeff !important;
+}
+[data-baseweb="option"]:hover {
+    background: #1c3050 !important;
+}
 </style>
 """
 
@@ -349,7 +436,10 @@ def stat_card(label: str, value: str, sub: str = "", accent: str = "var(--navy)"
 
 
 def section_header(title: str, subtitle: str = "") -> str:
-    sub_html = f'<p style="color:var(--text-lo);font-size:12.5px;margin:.2rem 0 0 0;">{subtitle}</p>' if subtitle else ""
+    sub_html = (
+        f'<p style="color:var(--text-lo);font-size:12.5px;margin:.2rem 0 0 0;">{subtitle}</p>'
+        if subtitle else ""
+    )
     return f"""
     <div style="margin: 1.8rem 0 1rem 0;">
         <h2 style="margin:0;font-family:'Syne',sans-serif;font-size:1.15rem;
@@ -360,7 +450,10 @@ def section_header(title: str, subtitle: str = "") -> str:
 
 
 def page_title(icon: str, title: str, subtitle: str = "") -> str:
-    sub_html = f'<p style="color:var(--text-lo);font-size:12.5px;margin:.35rem 0 0 0;">{subtitle}</p>' if subtitle else ""
+    sub_html = (
+        f'<p style="color:var(--text-lo);font-size:12.5px;margin:.35rem 0 0 0;">{subtitle}</p>'
+        if subtitle else ""
+    )
     return f"""
     <div style="margin-bottom:1.5rem;">
         <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.15rem;">
