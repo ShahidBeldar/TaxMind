@@ -3,7 +3,7 @@ from utils.db import init_db, create_user, authenticate_user, update_user_profil
 from utils.i18n import t
 from utils.theme import inject_theme, page_title, card
 
-# ── Page config — must be the very first Streamlit call ──────────────────────
+# ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="TaxMind AI",
     page_icon="💹",
@@ -35,7 +35,7 @@ def _init_session():
 
 _init_session()
 
-# ── Load profile from DB row ──────────────────────────────────────────────────
+
 def _load_session_from_row(row):
     st.session_state.logged_in        = True
     st.session_state.user_id          = row["id"]
@@ -47,7 +47,7 @@ def _load_session_from_row(row):
     st.session_state.language         = row["language"] or "en"
     st.session_state.setup_complete   = row["setup_complete"] or 0
 
-# ── Logout ────────────────────────────────────────────────────────────────────
+
 def logout():
     for key in ["logged_in", "user_id", "username", "name", "employment_type",
                 "income_bracket", "preferred_regime", "language",
@@ -59,22 +59,21 @@ def logout():
     st.session_state.chat_history   = []
     st.rerun()
 
+
 # ── Auth UI ───────────────────────────────────────────────────────────────────
 def render_auth():
     inject_theme()
-
-    # Centered layout
     _, col, _ = st.columns([1, 1.6, 1])
     with col:
         st.markdown("""
         <div style="text-align:center;padding:2.5rem 0 1.5rem 0;">
             <div style="font-size:2.8rem;margin-bottom:.5rem;">💹</div>
             <h1 style="font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;
-                       color:#f0f4ff;letter-spacing:-.04em;margin:0;">TaxMind AI</h1>
-            <p style="color:#5a6a85;font-size:14px;margin:.4rem 0 0 0;letter-spacing:.06em;
+                       color:#edf2ff;letter-spacing:-.04em;margin:0;">TaxMind AI</h1>
+            <p style="color:#4a5a72;font-size:13px;margin:.4rem 0 0 0;letter-spacing:.06em;
                       text-transform:uppercase;">Indian Tax Planning · FY 2026</p>
         </div>
-        <hr style="border-color:#252d3d;margin:0 0 1.5rem 0;">
+        <hr style="border-color:#1e2a3d;margin:0 0 1.5rem 0;">
         """, unsafe_allow_html=True)
 
         tab_login, tab_signup = st.tabs(["Sign In", "Create Account"])
@@ -120,10 +119,11 @@ def render_auth():
                         st.error(t("username_taken"))
 
         st.markdown("""
-        <p style="text-align:center;color:#5a6a85;font-size:11px;margin-top:1.5rem;">
+        <p style="text-align:center;color:#4a5a72;font-size:11px;margin-top:1.5rem;">
             Data stored locally · FY 2026 New Regime · AI-powered advice
         </p>
         """, unsafe_allow_html=True)
+
 
 # ── Profile wizard ────────────────────────────────────────────────────────────
 def render_wizard():
@@ -132,23 +132,23 @@ def render_wizard():
     with col:
         st.markdown("""
         <div style="padding:1.5rem 0 .5rem 0;">
-            <h1 style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#f0f4ff;margin:0;">
+            <h1 style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#edf2ff;margin:0;">
                 Set Up Your Profile
             </h1>
-            <p style="color:#5a6a85;font-size:13px;margin:.4rem 0 0 0;">
+            <p style="color:#4a5a72;font-size:13px;margin:.4rem 0 0 0;">
                 This helps personalise your tax advice and dashboard.
             </p>
         </div>
-        <hr style="border-color:#252d3d;">
+        <hr style="border-color:#1e2a3d;">
         """, unsafe_allow_html=True)
 
-        name = st.text_input(t("full_name"), value=st.session_state.name, placeholder="e.g. Arjun Mehta")
-        employment_type = st.selectbox(t("employment_type"), options=["Salaried", "Self-Employed", "Business"])
-        income_bracket  = st.selectbox(t("income_bracket"),
+        name             = st.text_input(t("full_name"), value=st.session_state.name, placeholder="e.g. Arjun Mehta")
+        employment_type  = st.selectbox(t("employment_type"), options=["Salaried", "Self-Employed", "Business"])
+        income_bracket   = st.selectbox(t("income_bracket"),
             options=["Below 5L", "5L - 10L", "10L - 15L", "15L - 25L", "25L - 50L", "Above 50L"])
         preferred_regime = st.selectbox(t("preferred_regime"), options=["new", "old"],
             format_func=lambda x: "New Regime (FY 2026 default)" if x == "new" else "Old Regime")
-        language = st.selectbox(t("language_label"), options=["en", "hi"],
+        language         = st.selectbox(t("language_label"), options=["en", "hi"],
             format_func=lambda x: "English" if x == "en" else "Hindi")
 
         st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
@@ -167,41 +167,114 @@ def render_wizard():
                 st.success(t("wizard_saved"))
                 st.rerun()
 
+
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 def render_sidebar():
     with st.sidebar:
-        st.markdown(f"""
-        <div style="padding:.8rem 0 .5rem 0;">
-            <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#f0f4ff;">
-                {st.session_state.name or st.session_state.username}
-            </div>
-            <div style="color:#5a6a85;font-size:11px;margin-top:.2rem;letter-spacing:.04em;">
-                {st.session_state.employment_type} · {st.session_state.income_bracket}
+        # ── Brand + user info ─────────────────────────────────────────────────
+        st.markdown("""
+        <div style="padding:1.2rem 1rem 0.8rem 1rem;border-bottom:1px solid #1e2a3d;">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.8rem;">
+                <span style="font-size:1.2rem;">💹</span>
+                <span style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;
+                             color:#edf2ff;letter-spacing:-.02em;">TaxMind AI</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.markdown("<hr style='border-color:#252d3d;margin:.6rem 0;'>", unsafe_allow_html=True)
 
-        lang = st.selectbox(t("language_label"), options=["en", "hi"],
-            format_func=lambda x: "English" if x == "en" else "Hindi",
-            index=0 if st.session_state.language == "en" else 1, key="sidebar_language")
+        # ── User profile pill ─────────────────────────────────────────────────
+        name_display = st.session_state.name or st.session_state.username
+        emp   = st.session_state.employment_type or "—"
+        bkt   = st.session_state.income_bracket or "—"
+        regime = "New" if st.session_state.preferred_regime == "new" else "Old"
+        st.markdown(f"""
+        <div style="padding:.8rem 1rem;border-bottom:1px solid #1e2a3d;">
+            <div style="font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;
+                        color:#edf2ff;margin-bottom:.25rem;white-space:nowrap;
+                        overflow:hidden;text-overflow:ellipsis;">
+                {name_display}
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:.3rem;">
+                <span style="background:#161d2e;border:1px solid #1e2a3d;border-radius:5px;
+                             color:#4a5a72;font-size:10px;padding:1px 6px;letter-spacing:.03em;">
+                    {emp}
+                </span>
+                <span style="background:#161d2e;border:1px solid #1e2a3d;border-radius:5px;
+                             color:#4a5a72;font-size:10px;padding:1px 6px;letter-spacing:.03em;">
+                    {bkt}
+                </span>
+                <span style="background:#0d2018;border:1px solid #1e3d28;border-radius:5px;
+                             color:#00e676;font-size:10px;padding:1px 6px;letter-spacing:.03em;">
+                    {regime} Regime
+                </span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # ── Navigation ────────────────────────────────────────────────────────
+        st.markdown("""
+        <div style="padding:.6rem 1rem .25rem 1rem;">
+            <div style="color:#4a5a72;font-size:10px;font-weight:600;
+                        letter-spacing:.1em;text-transform:uppercase;
+                        font-family:'DM Mono',monospace;">Navigation</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        nav_items = [
+            ("🏠", "Home",                 "/"),
+            ("📊", "Dashboard",            "/Dashboard"),
+            ("🤖", "AI Advisor",           "/AI_Advisor"),
+            ("💳", "Expenses",             "/Expenses"),
+            ("📋", "GST & ITR Tips",       "/GST_ITR_Tips"),
+            ("📈", "Predictive Planning",  "/Predictive_Planning"),
+            ("⬆️", "Upload Data",          "/Upload_Data"),
+            ("💰", "Pricing",              "/Pricing"),
+            ("🧠", "Why TaxMind",          "/Why_TaxMind"),
+        ]
+
+        for icon, label, page_path in nav_items:
+            if st.button(f"{icon}  {label}", key=f"nav_{label}", use_container_width=True):
+                st.switch_page(f"pages/{page_path.lstrip('/')}.py" if page_path != "/" else "app.py")
+
+        # ── Language ──────────────────────────────────────────────────────────
+        st.markdown("""
+        <div style="padding:.6rem 1rem .25rem 1rem;margin-top:.4rem;border-top:1px solid #1e2a3d;">
+            <div style="color:#4a5a72;font-size:10px;font-weight:600;
+                        letter-spacing:.1em;text-transform:uppercase;
+                        font-family:'DM Mono',monospace;">Settings</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        lang = st.selectbox(
+            t("language_label"),
+            options=["en", "hi"],
+            format_func=lambda x: "🇬🇧  English" if x == "en" else "🇮🇳  Hindi",
+            index=0 if st.session_state.language == "en" else 1,
+            key="sidebar_language",
+        )
         if lang != st.session_state.language:
             from utils.db import update_user_language
             update_user_language(st.session_state.user_id, lang)
             st.session_state.language = lang
             st.rerun()
 
-        st.markdown("<hr style='border-color:#252d3d;margin:.6rem 0;'>", unsafe_allow_html=True)
-        if st.button(t("logout"), use_container_width=True):
+        # ── Logout (bottom) ───────────────────────────────────────────────────
+        st.markdown("""
+        <div style="border-top:1px solid #1e2a3d;padding:.5rem 0 0 0;margin-top:.6rem;"></div>
+        """, unsafe_allow_html=True)
+
+        if st.button("⎋  Sign Out", key="btn_logout", use_container_width=True):
             logout()
 
         st.markdown("""
-        <div style="position:absolute;bottom:1.5rem;left:1rem;right:1rem;">
-            <div style="color:#5a6a85;font-size:10px;text-align:center;letter-spacing:.04em;">
+        <div style="padding:.8rem 1rem;margin-top:.4rem;">
+            <div style="color:#2a3a52;font-size:10px;text-align:center;
+                        letter-spacing:.04em;font-family:'DM Mono',monospace;">
                 TaxMind AI · FY 2026
             </div>
         </div>
         """, unsafe_allow_html=True)
+
 
 # ── Home page ─────────────────────────────────────────────────────────────────
 def render_home():
@@ -210,33 +283,35 @@ def render_home():
                 unsafe_allow_html=True)
 
     name = st.session_state.name or st.session_state.username
+    regime_label = "New Regime (FY 2026)" if st.session_state.preferred_regime == "new" else "Old Regime"
+
     st.markdown(f"""
     <div style="
-        background:linear-gradient(135deg, #171c27 0%, #1a2435 100%);
-        border:1px solid #252d3d;
+        background:linear-gradient(135deg, #111827 0%, #141f32 100%);
+        border:1px solid #1e2a3d;
         border-left:3px solid #00e676;
         border-radius:16px;
         padding:1.6rem 2rem;
         margin-bottom:1.5rem;
     ">
-        <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;
-                    color:#f0f4ff;margin-bottom:.4rem;">
+        <div style="font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;
+                    color:#edf2ff;margin-bottom:.4rem;">
             Welcome back, {name} 👋
         </div>
-        <p style="color:#9aaac4;font-size:14px;margin:0;line-height:1.6;">
-            Use the sidebar to navigate. Your data is secure and stored locally.
+        <p style="color:#8899b8;font-size:13.5px;margin:0;line-height:1.65;">
+            {st.session_state.employment_type} · {st.session_state.income_bracket} · {regime_label}<br>
+            Navigate using the sidebar to explore your tax dashboard, AI advisor, and more.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Quick-nav cards
     pages = [
-        ("📊", "Dashboard", "Tax calculator with slab breakdown & PDF export"),
-        ("🤖", "AI Advisor", "Ask anything about ITR, GST, advance tax"),
-        ("💳", "Expenses", "Categorised spend overview with charts"),
-        ("📋", "GST & ITR Tips", "Deadlines, penalties, regime comparison"),
-        ("📈", "Predictive Planning", "Year-end projection from monthly trends"),
-        ("⬆️", "Upload Data", "Add transactions manually or via CSV"),
+        ("📊", "Dashboard",            "Tax calculator with slab breakdown & PDF export"),
+        ("🤖", "AI Advisor",           "Ask anything about ITR, GST, advance tax"),
+        ("💳", "Expenses",             "Categorised spend overview with charts"),
+        ("📋", "GST & ITR Tips",       "Deadlines, penalties, regime comparison"),
+        ("📈", "Predictive Planning",  "Year-end projection from monthly trends"),
+        ("⬆️", "Upload Data",          "Add transactions manually or via CSV"),
     ]
 
     cols = st.columns(3)
@@ -244,23 +319,23 @@ def render_home():
         with cols[i % 3]:
             st.markdown(f"""
             <div style="
-                background:#171c27;border:1px solid #252d3d;border-radius:14px;
+                background:#111827;border:1px solid #1e2a3d;border-radius:14px;
                 padding:1.2rem 1.3rem;margin-bottom:.8rem;height:110px;
-                transition:border-color .2s;
             ">
-                <div style="font-size:1.4rem;margin-bottom:.4rem;">{icon}</div>
+                <div style="font-size:1.3rem;margin-bottom:.35rem;">{icon}</div>
                 <div style="font-family:'Syne',sans-serif;font-weight:700;
-                            font-size:.95rem;color:#f0f4ff;">{title}</div>
-                <div style="color:#5a6a85;font-size:11px;margin-top:.2rem;">{desc}</div>
+                            font-size:.9rem;color:#edf2ff;">{title}</div>
+                <div style="color:#4a5a72;font-size:11px;margin-top:.2rem;">{desc}</div>
             </div>
             """, unsafe_allow_html=True)
 
     st.markdown("""
-    <p style="color:#5a6a85;font-size:11px;margin-top:1rem;text-align:center;">
-        Transaction data is stored in a local SQLite file (taxmind.db).
-        Data persists within the current deployment instance.
+    <p style="color:#4a5a72;font-size:11px;margin-top:.8rem;text-align:center;
+              font-family:'DM Mono',monospace;letter-spacing:.02em;">
+        Transaction data stored in local SQLite · Data persists within the current deployment
     </p>
     """, unsafe_allow_html=True)
+
 
 # ── Router ────────────────────────────────────────────────────────────────────
 if not st.session_state.logged_in:
