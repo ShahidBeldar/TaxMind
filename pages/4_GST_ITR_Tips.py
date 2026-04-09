@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from utils.i18n import t
+from utils.sidebar import render_sidebar
 from utils.theme import inject_theme, page_title, section_header, card
 
 # ── Auth guard ────────────────────────────────────────────────────────────────
@@ -10,6 +11,7 @@ if not st.session_state.get("logged_in"):
     st.stop()
 
 inject_theme()
+render_sidebar()
 
 PLOTLY_LAYOUT = dict(
     paper_bgcolor="rgba(0,0,0,0)",

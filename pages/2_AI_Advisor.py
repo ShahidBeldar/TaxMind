@@ -3,6 +3,7 @@ from utils.i18n import t
 from utils.db import get_transactions
 from utils.tax import calculate_tax
 from utils.groq_client import chat
+from utils.sidebar import render_sidebar
 from utils.theme import inject_theme, page_title
 
 # ── Auth guard ────────────────────────────────────────────────────────────────
@@ -11,6 +12,7 @@ if not st.session_state.get("logged_in"):
     st.stop()
 
 inject_theme()
+render_sidebar()
 
 # ── Context builder ───────────────────────────────────────────────────────────
 def _build_context() -> dict:

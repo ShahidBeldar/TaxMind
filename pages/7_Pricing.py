@@ -1,5 +1,6 @@
 import streamlit as st
 from utils.i18n import t
+from utils.sidebar import render_sidebar
 from utils.theme import inject_theme, page_title
 
 # ── Auth guard ────────────────────────────────────────────────────────────────
@@ -8,6 +9,7 @@ if not st.session_state.get("logged_in"):
     st.stop()
 
 inject_theme()
+render_sidebar()
 
 st.markdown(page_title("💰", "Pricing", "Simple, transparent plans for every taxpayer"),
             unsafe_allow_html=True)

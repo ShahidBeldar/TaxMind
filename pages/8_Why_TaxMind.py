@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.sidebar import render_sidebar
 from utils.theme import inject_theme, page_title, card
 
 # ── Auth guard ────────────────────────────────────────────────────────────────
@@ -7,6 +8,7 @@ if not st.session_state.get("logged_in"):
     st.stop()
 
 inject_theme()
+render_sidebar()
 
 st.markdown(page_title("🧠", "Why TaxMind",
     "Built exclusively for FY 2026 Indian taxpayers"),

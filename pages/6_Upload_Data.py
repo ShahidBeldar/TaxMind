@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from utils.i18n import t
 from utils.db import insert_transaction, bulk_insert_transactions
+from utils.sidebar import render_sidebar
 from utils.theme import inject_theme, page_title, section_header
 
 # ── Auth guard ────────────────────────────────────────────────────────────────
@@ -10,6 +11,7 @@ if not st.session_state.get("logged_in"):
     st.stop()
 
 inject_theme()
+render_sidebar()
 
 st.markdown(page_title("⬆️", "Upload Data", "Add transactions manually or import via CSV"),
             unsafe_allow_html=True)
