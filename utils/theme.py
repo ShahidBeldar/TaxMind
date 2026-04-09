@@ -1,7 +1,7 @@
 """
 TaxMind AI — Shared dark-mode theme injector.
 Navy palette. No emojis. Production-ready.
-FIXED: input visibility, button text color, sidebar wildcard bleed.
+FIXED v2: BaseWeb input selectors, button text, sidebar wildcard bleed.
 """
 import streamlit as st
 
@@ -66,7 +66,7 @@ div[class*="sidebarNav"] {
     visibility: hidden !important;
 }
 
-/* ── Sidebar shell — NO wildcard * color rule ── */
+/* ── Sidebar shell — NO wildcard * color ── */
 [data-testid="stSidebar"] {
     background: var(--bg-card) !important;
     border-right: 1px solid var(--border) !important;
@@ -76,16 +76,13 @@ div[class*="sidebarNav"] {
 [data-testid="stSidebar"] > div:first-child {
     padding: 0 !important;
 }
-
-/* Sidebar text — targeted, not wildcard */
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
-[data-testid="stSidebar"] div,
 [data-testid="stSidebar"] label {
     color: var(--text-hi);
 }
 
-/* ── Nav buttons in sidebar ── */
+/* ── Sidebar nav buttons ── */
 [data-testid="stSidebar"] .stButton > button {
     background: transparent !important;
     border: none !important;
@@ -100,16 +97,14 @@ div[class*="sidebarNav"] {
     transition: var(--transition) !important;
     margin: 1px 0 !important;
     box-shadow: none !important;
-    letter-spacing: 0.01em !important;
 }
 [data-testid="stSidebar"] .stButton > button:hover {
     background: var(--bg-card2) !important;
     color: var(--text-hi) !important;
-    transform: none !important;
-    box-shadow: none !important;
 }
 [data-testid="stSidebar"] .stButton > button p {
     color: inherit !important;
+    font-weight: inherit !important;
 }
 
 /* ── Sidebar selectbox ── */
@@ -119,10 +114,11 @@ div[class*="sidebarNav"] {
     letter-spacing: 0.07em !important;
     text-transform: uppercase !important;
 }
-[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div {
+[data-testid="stSidebar"] div[data-baseweb="select"] > div {
     background: var(--bg-card2) !important;
     border-color: var(--border-hi) !important;
     font-size: 12.5px !important;
+    color: var(--text-hi) !important;
 }
 
 /* ── Headings ── */
@@ -158,68 +154,115 @@ small, .stCaption, [data-testid="stCaptionContainer"] * {
     font-size: 1.45rem !important;
 }
 
-/* ── Inputs — updated selectors for modern Streamlit ── */
-/* Text inputs */
-.stTextInput > div > div > input {
-    background: #111d33 !important;
+/* ════════════════════════════════════════════════════════
+   INPUT FIELDS
+   Streamlit 1.44+ uses BaseWeb components.
+   DOM structure:
+     .stTextInput
+       > div                          (label wrapper)
+       > div[data-baseweb="input"]    (visible bordered box)
+         > div                        (inner flex row)
+           > input                    (the actual input)
+   ════════════════════════════════════════════════════════ */
+
+/* Outer bordered container */
+div[data-baseweb="input"] {
+    background-color: #111d33 !important;
     border: 1.5px solid #2a4068 !important;
-    border-radius: var(--radius) !important;
+    border-radius: 10px !important;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+}
+div[data-baseweb="input"]:focus-within {
+    border-color: #4f8ef7 !important;
+    box-shadow: 0 0 0 3px rgba(79,142,247,0.18) !important;
+}
+
+/* Actual <input> inside BaseWeb */
+div[data-baseweb="input"] input {
+    background-color: transparent !important;
     color: #e8eeff !important;
-    font-family: var(--font-body) !important;
+    font-family: 'Inter', sans-serif !important;
     font-size: 14px !important;
-    padding: 0.5rem 0.75rem !important;
-    transition: var(--transition) !important;
-}
-.stTextInput > div > div > input:focus {
-    border-color: var(--navy) !important;
-    box-shadow: 0 0 0 2px rgba(79,142,247,0.2) !important;
+    caret-color: #4f8ef7 !important;
+    border: none !important;
     outline: none !important;
+    box-shadow: none !important;
 }
-.stTextInput > div > div > input::placeholder {
+div[data-baseweb="input"] input::placeholder {
+    color: #3d5070 !important;
+    opacity: 1 !important;
+}
+
+/* Password eye icon button inside input */
+div[data-baseweb="input"] button {
+    background: transparent !important;
+    border: none !important;
     color: #3d5070 !important;
 }
-
-/* Number inputs */
-.stNumberInput > div > div > input {
-    background: #111d33 !important;
-    border: 1.5px solid #2a4068 !important;
-    border-radius: var(--radius) !important;
-    color: #e8eeff !important;
-    font-family: var(--font-body) !important;
-}
-.stNumberInput > div > div > input:focus {
-    border-color: var(--navy) !important;
-    box-shadow: 0 0 0 2px rgba(79,142,247,0.2) !important;
+div[data-baseweb="input"] button:hover {
+    color: #7a90b8 !important;
 }
 
-/* Selectbox */
-.stSelectbox > div > div {
-    background: #111d33 !important;
+/* Textarea (st.text_area) */
+div[data-baseweb="textarea"] {
+    background-color: #111d33 !important;
     border: 1.5px solid #2a4068 !important;
-    border-radius: var(--radius) !important;
-    color: #e8eeff !important;
+    border-radius: 10px !important;
 }
-.stSelectbox [data-baseweb="select"] > div {
-    background: #111d33 !important;
-    border-color: #2a4068 !important;
+div[data-baseweb="textarea"]:focus-within {
+    border-color: #4f8ef7 !important;
+    box-shadow: 0 0 0 3px rgba(79,142,247,0.18) !important;
+}
+div[data-baseweb="textarea"] textarea {
+    background-color: transparent !important;
     color: #e8eeff !important;
+    font-family: 'Inter', sans-serif !important;
+    caret-color: #4f8ef7 !important;
+    border: none !important;
+    outline: none !important;
+}
+div[data-baseweb="textarea"] textarea::placeholder {
+    color: #3d5070 !important;
+    opacity: 1 !important;
 }
 
-/* Date input */
-.stDateInput > div > div > input {
-    background: #111d33 !important;
+/* Selectbox (st.selectbox, st.multiselect) */
+div[data-baseweb="select"] > div {
+    background-color: #111d33 !important;
     border: 1.5px solid #2a4068 !important;
-    border-radius: var(--radius) !important;
+    border-radius: 10px !important;
     color: #e8eeff !important;
 }
-
-/* Textarea */
-textarea {
-    background: #111d33 !important;
-    border: 1.5px solid #2a4068 !important;
-    border-radius: var(--radius) !important;
+div[data-baseweb="select"] > div:focus-within {
+    border-color: #4f8ef7 !important;
+    box-shadow: 0 0 0 3px rgba(79,142,247,0.18) !important;
+}
+div[data-baseweb="select"] span {
     color: #e8eeff !important;
-    font-family: var(--font-body) !important;
+}
+div[data-baseweb="select"] svg {
+    fill: #3d5070 !important;
+}
+
+/* Dropdown popover/menu */
+div[data-baseweb="popover"] {
+    background-color: #111d33 !important;
+    border: 1px solid #2a4068 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+}
+div[data-baseweb="menu"] {
+    background-color: #111d33 !important;
+    border-radius: 10px !important;
+}
+li[data-baseweb="menu-item"],
+[role="option"] {
+    background-color: #111d33 !important;
+    color: #e8eeff !important;
+}
+li[data-baseweb="menu-item"]:hover,
+[role="option"]:hover {
+    background-color: #1c3050 !important;
 }
 
 /* Input labels */
@@ -228,45 +271,49 @@ textarea {
 .stSelectbox label,
 .stDateInput label,
 .stTextArea label {
-    color: var(--text-md) !important;
+    color: #7a90b8 !important;
     font-size: 13px !important;
     font-weight: 500 !important;
     letter-spacing: 0.02em !important;
+    margin-bottom: 4px !important;
+    display: block !important;
 }
 
-/* ── PRIMARY BUTTONS — main area ── */
-/* This targets ALL buttons in main content with correct text color */
+/* ════════════════════════════════════════════════════════
+   BUTTONS — main content area only
+   ════════════════════════════════════════════════════════ */
 .main .stButton > button,
 [data-testid="stMainBlockContainer"] .stButton > button {
-    background: var(--navy) !important;
-    color: #ffffff !important;          /* WHITE — clearly visible on blue */
-    font-family: var(--font-head) !important;
+    background: #4f8ef7 !important;
+    color: #ffffff !important;
+    font-family: 'Syne', sans-serif !important;
     font-weight: 700 !important;
     font-size: 13.5px !important;
     border: none !important;
-    border-radius: var(--radius) !important;
+    border-radius: 10px !important;
     padding: 0.55rem 1.4rem !important;
     letter-spacing: 0.03em !important;
-    transition: var(--transition) !important;
-    box-shadow: 0 2px 14px var(--navy-glow) !important;
+    transition: all 0.18s cubic-bezier(0.4,0,0.2,1) !important;
+    box-shadow: 0 2px 14px rgba(79,142,247,0.14) !important;
 }
 .main .stButton > button:hover,
 [data-testid="stMainBlockContainer"] .stButton > button:hover {
-    background: var(--navy-dim) !important;
+    background: #3a75e0 !important;
     color: #ffffff !important;
     transform: translateY(-1px) !important;
-    box-shadow: 0 6px 22px var(--navy-glow) !important;
+    box-shadow: 0 6px 22px rgba(79,142,247,0.25) !important;
 }
 .main .stButton > button:active,
 [data-testid="stMainBlockContainer"] .stButton > button:active {
     transform: translateY(0) !important;
 }
-
-/* Button inner <p> tag fix — Streamlit wraps text in p */
+/* Streamlit wraps button label in <p> — must override */
 .main .stButton > button p,
 [data-testid="stMainBlockContainer"] .stButton > button p {
     color: #ffffff !important;
     font-weight: 700 !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
 }
 
 /* ── Download button ── */
@@ -279,9 +326,8 @@ textarea {
     border-radius: var(--radius) !important;
     transition: var(--transition) !important;
 }
-.stDownloadButton > button:hover {
-    background: var(--navy-glow) !important;
-}
+.stDownloadButton > button p { color: var(--navy) !important; }
+.stDownloadButton > button:hover { background: var(--navy-glow) !important; }
 
 /* ── Tabs ── */
 [data-testid="stTabs"] [role="tab"] {
@@ -294,10 +340,7 @@ textarea {
     color: var(--navy) !important;
     border-bottom-color: var(--navy) !important;
 }
-/* Tab button text */
-[data-testid="stTabs"] [role="tab"] p {
-    color: inherit !important;
-}
+[data-testid="stTabs"] [role="tab"] p { color: inherit !important; }
 
 /* ── Tables ── */
 [data-testid="stTable"] table {
@@ -321,7 +364,6 @@ textarea {
     color: var(--text-md) !important;
 }
 [data-testid="stTable"] tr:hover td { background: var(--bg-card2) !important; }
-
 [data-testid="stDataFrame"] {
     border: 1px solid var(--border) !important;
     border-radius: var(--radius) !important;
@@ -342,12 +384,16 @@ textarea {
     border-radius: var(--radius-lg) !important;
     margin-bottom: .6rem !important;
 }
-.stChatInput textarea {
+.stChatInput div[data-baseweb="textarea"] {
     background: var(--bg-card2) !important;
     border-color: var(--border-hi) !important;
+}
+.stChatInput div[data-baseweb="textarea"]:focus-within {
+    border-color: var(--navy) !important;
+}
+.stChatInput div[data-baseweb="textarea"] textarea {
     color: var(--text-hi) !important;
 }
-.stChatInput textarea:focus { border-color: var(--navy) !important; }
 
 /* ── File uploader ── */
 [data-testid="stFileUploader"] {
@@ -371,22 +417,6 @@ code, pre {
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
-
-/* ── BaseWeb / Emotion overrides for dropdowns ── */
-[data-baseweb="popover"] {
-    background: #111d33 !important;
-    border: 1px solid #2a4068 !important;
-}
-[data-baseweb="menu"] {
-    background: #111d33 !important;
-}
-[data-baseweb="option"] {
-    background: #111d33 !important;
-    color: #e8eeff !important;
-}
-[data-baseweb="option"]:hover {
-    background: #1c3050 !important;
-}
 </style>
 """
 
