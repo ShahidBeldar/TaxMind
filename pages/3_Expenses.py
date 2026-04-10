@@ -6,9 +6,18 @@ from utils.db import get_transactions
 from utils.theme import inject_theme, page_title, section_header, stat_card
 from utils.sidebar import render_sidebar
 
+# Demo mode: ensure session is always populated
 if not st.session_state.get("logged_in"):
-    st.warning("Please log in to access this page.")
-    st.stop()
+    st.session_state.logged_in        = True
+    st.session_state.user_id          = 1
+    st.session_state.username         = "demo"
+    st.session_state.name             = "Arjun Mehta"
+    st.session_state.employment_type  = "Salaried"
+    st.session_state.income_bracket   = "10L - 15L"
+    st.session_state.preferred_regime = "new"
+    st.session_state.language         = "en"
+    st.session_state.setup_complete   = 1
+    st.session_state.chat_history     = []
 
 inject_theme()
 render_sidebar()
