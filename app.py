@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.db import init_db, create_user, authenticate_user, update_user_profile
+from utils.db import init_db, seed_demo_data, create_user, authenticate_user, update_user_profile
 from utils.i18n import t
 from utils.theme import inject_theme, page_title, card
 
@@ -11,6 +11,7 @@ st.set_page_config(
 )
 
 init_db()
+seed_demo_data()
 
 
 def _init_session():
