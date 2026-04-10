@@ -48,7 +48,7 @@ header[data-testid="stHeader"] {
 }
 #MainMenu, footer { visibility: hidden; }
 
-/* ── NUKE NATIVE STREAMLIT NAV — every known selector ── */
+/* ── NUKE NATIVE STREAMLIT NAV ── */
 [data-testid="stSidebarNav"],
 [data-testid="stSidebarNavItems"],
 [data-testid="stSidebarNavSeparator"],
@@ -103,24 +103,129 @@ div[class*="sidebarNav"] {
     box-shadow: none !important;
 }
 
-/* Logout button hover — red tint */
-[data-testid="stSidebar"] .stButton[data-testid*="logout"] > button:hover,
-[data-testid="stSidebar"] .element-container:has(button[kind*="logout"]) button:hover {
-    background: var(--red-glow) !important;
-    color: var(--red) !important;
+/* ── FIX: ALL text inputs — nuclear specificity ── */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+.stTextInput input,
+.stTextInput > div > div > input,
+div[data-baseweb="input"] input,
+div[data-baseweb="base-input"] input,
+[data-testid="stTextInput"] input,
+[data-testid="stTextInputRootElement"] input {
+    background-color: #1a2a4a !important;
+    color: #e8eeff !important;
+    border: 1.5px solid #2e4a7a !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-family: 'Inter', sans-serif !important;
+    padding: 10px 14px !important;
+    caret-color: #4f8ef7 !important;
+    -webkit-text-fill-color: #e8eeff !important;
 }
 
-/* ── Sidebar selectbox ── */
-[data-testid="stSidebar"] .stSelectbox label {
-    color: var(--text-lo) !important;
-    font-size: 10px !important;
-    letter-spacing: 0.07em !important;
-    text-transform: uppercase !important;
+/* ── FIX: Input wrapper backgrounds ── */
+div[data-baseweb="input"],
+div[data-baseweb="base-input"],
+.stTextInput > div > div,
+[data-testid="stTextInputRootElement"] > div {
+    background-color: #1a2a4a !important;
+    border: 1.5px solid #2e4a7a !important;
+    border-radius: 8px !important;
 }
-[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div {
-    background: var(--bg-card2) !important;
-    border-color: var(--border-hi) !important;
-    font-size: 12.5px !important;
+
+/* ── Placeholder ── */
+input::placeholder,
+.stTextInput input::placeholder {
+    color: #4a6080 !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #4a6080 !important;
+}
+
+/* ── Input focus ── */
+input:focus,
+.stTextInput input:focus,
+div[data-baseweb="input"]:focus-within,
+div[data-baseweb="base-input"]:focus-within {
+    border-color: #4f8ef7 !important;
+    box-shadow: 0 0 0 3px rgba(79,142,247,0.18) !important;
+    outline: none !important;
+}
+
+/* ── Input labels ── */
+.stTextInput label,
+.stNumberInput label,
+.stSelectbox label,
+.stDateInput label,
+[data-testid="stWidgetLabel"] {
+    color: #7a90b8 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* ── FIX: ALL buttons — white text, correct background ── */
+.stButton > button {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-family: 'Syne', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 13.5px !important;
+    border-radius: var(--radius) !important;
+    padding: 0.55rem 1.4rem !important;
+    letter-spacing: 0.03em !important;
+    transition: var(--transition) !important;
+    cursor: pointer !important;
+}
+
+/* Primary (blue) buttons — main area */
+.main .stButton > button,
+[data-testid="stMainBlockContainer"] .stButton > button {
+    background: #4f8ef7 !important;
+    background-color: #4f8ef7 !important;
+    border: none !important;
+    box-shadow: 0 2px 14px rgba(79,142,247,0.25) !important;
+}
+.main .stButton > button:hover,
+[data-testid="stMainBlockContainer"] .stButton > button:hover {
+    background: #3a75e0 !important;
+    background-color: #3a75e0 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 22px rgba(79,142,247,0.35) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+.main .stButton > button:active,
+[data-testid="stMainBlockContainer"] .stButton > button:active {
+    transform: translateY(0) !important;
+}
+
+/* Mode toggle buttons (Sign In / Create Account) — outlined style */
+.main .stButton > button[kind="secondary"],
+[data-testid="stMainBlockContainer"] .stButton > button[kind="secondary"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: 1.5px solid #2e4a7a !important;
+    color: #7a90b8 !important;
+    -webkit-text-fill-color: #7a90b8 !important;
+    box-shadow: none !important;
+}
+
+/* ── Download button ── */
+.stDownloadButton > button {
+    background: transparent !important;
+    border: 1px solid var(--navy) !important;
+    color: var(--navy) !important;
+    -webkit-text-fill-color: var(--navy) !important;
+    font-family: var(--font-head) !important;
+    font-weight: 600 !important;
+    border-radius: var(--radius) !important;
+    transition: var(--transition) !important;
+}
+.stDownloadButton > button:hover {
+    background: var(--navy-glow) !important;
 }
 
 /* ── Headings ── */
@@ -156,53 +261,31 @@ small, .stCaption, [data-testid="stCaptionContainer"] * {
     font-size: 1.45rem !important;
 }
 
-/* ── Input labels only — fields styled per-page to avoid conflicts ── */
-.stTextInput label, .stNumberInput label,
-.stSelectbox label, .stDateInput label {
-    color: var(--text-md) !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.02em !important;
+/* ── Selectbox ── */
+div[data-baseweb="select"] > div {
+    background-color: #1a2a4a !important;
+    border: 1.5px solid #2e4a7a !important;
+    border-radius: 8px !important;
+    color: #e8eeff !important;
 }
-
-/* ── Primary button (main area only) ── */
-.main .stButton > button,
-[data-testid="stMainBlockContainer"] .stButton > button {
-    background: var(--navy) !important;
-    color: #ffffff !important;
-    font-family: var(--font-head) !important;
-    font-weight: 700 !important;
-    font-size: 13.5px !important;
-    border: none !important;
-    border-radius: var(--radius) !important;
-    padding: 0.55rem 1.4rem !important;
-    letter-spacing: 0.03em !important;
-    transition: var(--transition) !important;
-    box-shadow: 0 2px 14px var(--navy-glow) !important;
+div[data-baseweb="select"] span {
+    color: #e8eeff !important;
+    -webkit-text-fill-color: #e8eeff !important;
 }
-.main .stButton > button:hover,
-[data-testid="stMainBlockContainer"] .stButton > button:hover {
-    background: var(--navy-dim) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 6px 22px var(--navy-glow) !important;
+div[data-baseweb="popover"] {
+    background-color: #111d33 !important;
+    border: 1px solid #2e4a7a !important;
 }
-.main .stButton > button:active,
-[data-testid="stMainBlockContainer"] .stButton > button:active {
-    transform: translateY(0) !important;
+div[data-baseweb="menu"] {
+    background-color: #111d33 !important;
 }
-
-/* ── Download button ── */
-.stDownloadButton > button {
-    background: transparent !important;
-    border: 1px solid var(--navy) !important;
-    color: var(--navy) !important;
-    font-family: var(--font-head) !important;
-    font-weight: 600 !important;
-    border-radius: var(--radius) !important;
-    transition: var(--transition) !important;
+div[data-baseweb="menu"] li {
+    color: #7a90b8 !important;
+    background-color: transparent !important;
 }
-.stDownloadButton > button:hover {
-    background: var(--navy-glow) !important;
+div[data-baseweb="menu"] li:hover {
+    background-color: #1a2a4a !important;
+    color: #e8eeff !important;
 }
 
 /* ── Tables ── */
