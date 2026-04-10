@@ -11,10 +11,3 @@ gatherUsageStats = false
 
 [server]
 headless = true
-
-[client]
-toolbarMode = "minimal"
-showSidebarNavigation = false
-
-[ui]
-hideTopBar = true
