@@ -54,7 +54,7 @@ def render_auth():
 
     st.markdown("""
     <style>
-    /* ── Auth page: nuclear input fix ── */
+    /* ── Input fields: visible background + text ── */
     .stTextInput input,
     .stTextInput > div > div > input,
     div[data-baseweb="input"] input,
@@ -86,17 +86,20 @@ def render_auth():
         border-color: #4f8ef7 !important;
         box-shadow: 0 0 0 3px rgba(79,142,247,.18) !important;
     }
-    /* Form card */
+
+    /* ── Form card ── */
     [data-testid="stForm"] {
         background: #0d1526 !important;
         border: 1px solid #1c2d4a !important;
         border-radius: 14px !important;
-        padding: 1.5rem 1.5rem 1rem 1.5rem !important;
+        padding: 1.5rem !important;
     }
-    /* Submit button */
-    [data-testid="stForm"] button[kind="primaryFormSubmit"],
-    [data-testid="stForm"] [data-testid="baseButton-primaryFormSubmit"] {
+
+    /* ── Submit button (solid blue) ── */
+    [data-testid="stForm"] button,
+    [data-testid="stForm"] .stButton > button {
         background: #4f8ef7 !important;
+        background-color: #4f8ef7 !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
         border: none !important;
@@ -106,24 +109,55 @@ def render_auth():
         width: 100% !important;
         padding: 12px !important;
         box-shadow: 0 2px 14px rgba(79,142,247,.3) !important;
+        transition: all .18s ease !important;
     }
-    /* Tab toggles — hide the actual Streamlit button chrome */
-    .auth-tab-row { display: flex; gap: 0; margin-bottom: 0; }
-    .auth-tab {
-        flex: 1; text-align: center; padding: 10px 0 12px 0;
-        font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
-        color: #3d5070; cursor: pointer; border-bottom: 2px solid #1c2d4a;
-        letter-spacing: .02em; transition: color .15s, border-color .15s;
-        user-select: none;
+    [data-testid="stForm"] button:hover,
+    [data-testid="stForm"] .stButton > button:hover {
+        background: #3a75e0 !important;
+        background-color: #3a75e0 !important;
+        box-shadow: 0 6px 22px rgba(79,142,247,.4) !important;
+        transform: translateY(-1px) !important;
     }
-    .auth-tab.active { color: #e8eeff; border-bottom-color: #4f8ef7; }
-    .auth-tab:not(.active):hover { color: #7a90b8; }
+
+    /* ── Mode toggle buttons: outlined, consistent pair ── */
+    div[data-testid="column"] .stButton > button {
+        background: transparent !important;
+        background-color: transparent !important;
+        border: 1.5px solid #2e4a7a !important;
+        color: #7a90b8 !important;
+        -webkit-text-fill-color: #7a90b8 !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+        padding: 9px 0 !important;
+        box-shadow: none !important;
+        transform: none !important;
+        transition: all .15s ease !important;
+        width: 100% !important;
+    }
+    div[data-testid="column"] .stButton > button:hover {
+        border-color: #4f8ef7 !important;
+        color: #e8eeff !important;
+        -webkit-text-fill-color: #e8eeff !important;
+        background: rgba(79,142,247,.07) !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    /* Active / selected mode button */
+    div[data-testid="column"] .stButton > button[data-active="true"],
+    div[data-testid="column"] .stButton > button:focus {
+        border-color: #4f8ef7 !important;
+        color: #e8eeff !important;
+        -webkit-text-fill-color: #e8eeff !important;
+        background: rgba(79,142,247,.1) !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
     _, col, _ = st.columns([1, 1.6, 1])
     with col:
-        # Brand header
         st.markdown("""
         <div style="text-align:center;padding:2.5rem 0 1.4rem 0;">
             <div style="font-family:'Syne',sans-serif;font-size:2.1rem;font-weight:800;
@@ -133,35 +167,34 @@ def render_auth():
                 Indian Tax Planning · FY 2026
             </p>
         </div>
+        <hr style="border-color:#1c2d4a;margin:0 0 1.4rem 0;">
         """, unsafe_allow_html=True)
 
-        # Tab-style mode toggle — rendered as HTML, backed by invisible st.buttons
+        # Mode toggle — two outlined buttons, active one gets a highlighted border
         mode = st.session_state.auth_mode
-        login_cls  = "auth-tab active" if mode == "login"  else "auth-tab"
-        signup_cls = "auth-tab active" if mode == "signup" else "auth-tab"
-        st.markdown(f"""
-        <div class="auth-tab-row">
-            <div class="{login_cls}"  onclick="window.parent.document.querySelectorAll('[data-testid=stButton] button')[0].click()">Sign In</div>
-            <div class="{signup_cls}" onclick="window.parent.document.querySelectorAll('[data-testid=stButton] button')[1].click()">Create Account</div>
-        </div>
-        <div style="height:20px"></div>
-        """, unsafe_allow_html=True)
-
-        # Hidden backing buttons (zero-height, zero-opacity)
-        st.markdown("""<div style="height:0;overflow:hidden;opacity:0;position:absolute;pointer-events:none;">""",
-                    unsafe_allow_html=True)
         c1, c2 = st.columns(2)
         with c1:
-            if st.button("Sign In", key="mode_login"):
+            if st.button("Sign In", key="mode_login", use_container_width=True):
                 st.session_state.auth_mode  = "login"
                 st.session_state.auth_error = ""
                 st.rerun()
         with c2:
-            if st.button("Create Account", key="mode_signup"):
+            if st.button("Create Account", key="mode_signup", use_container_width=True):
                 st.session_state.auth_mode  = "signup"
                 st.session_state.auth_error = ""
                 st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+
+        # Active indicator underline beneath the selected button
+        st.markdown(f"""
+        <div style="display:flex;margin-top:-6px;margin-bottom:18px;">
+            <div style="flex:1;height:2px;
+                        background:{'#4f8ef7' if mode=='login' else 'transparent'};
+                        border-radius:2px;transition:background .2s;"></div>
+            <div style="flex:1;height:2px;
+                        background:{'#4f8ef7' if mode=='signup' else 'transparent'};
+                        border-radius:2px;transition:background .2s;"></div>
+        </div>
+        """, unsafe_allow_html=True)
 
         if st.session_state.auth_error:
             st.error(st.session_state.auth_error)
