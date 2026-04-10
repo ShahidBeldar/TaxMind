@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from utils.db import init_db, create_user, authenticate_user, update_user_profile
 from utils.i18n import t
 from utils.theme import inject_theme, page_title, card
@@ -48,174 +49,160 @@ def _load_session_from_row(row):
     st.session_state.setup_complete   = row["setup_complete"] or 0
 
 
-# ── Auth page ─────────────────────────────────────────────────────────────────
+def _process_query_params():
+    params = st.query_params
+    action = params.get("action", "")
+
+    if action == "login":
+        username = params.get("u", "").strip()
+        password = params.get("p", "").strip()
+        st.query_params.clear()
+        if not username or not password:
+            st.session_state.auth_error = "Please enter your username and password."
+        else:
+            row = authenticate_user(username, password)
+            if row:
+                st.session_state.auth_error = ""
+                _load_session_from_row(row)
+            else:
+                st.session_state.auth_error = "Invalid username or password."
+
+    elif action == "signup":
+        username = params.get("u", "").strip()
+        password = params.get("p", "").strip()
+        confirm  = params.get("c", "").strip()
+        st.query_params.clear()
+        if not username or not password:
+            st.session_state.auth_error = "Username and password are required."
+        elif password != confirm:
+            st.session_state.auth_error = "Passwords do not match."
+        elif len(password) < 6:
+            st.session_state.auth_error = "Password must be at least 6 characters."
+        else:
+            success = create_user(username, password)
+            if success:
+                row = authenticate_user(username, password)
+                if row:
+                    st.session_state.auth_error = ""
+                    _load_session_from_row(row)
+            else:
+                st.session_state.auth_error = "Username already taken. Choose another."
+
+    elif action == "mode":
+        mode = params.get("m", "login")
+        st.query_params.clear()
+        st.session_state.auth_mode  = mode
+        st.session_state.auth_error = ""
+
+
+_process_query_params()
+
+
 def render_auth():
     inject_theme()
 
-    # Nuclear-specificity CSS to force inputs visible in ALL Streamlit versions
-    st.markdown("""
-    <style>
-    /* Input wrapper */
-    .stTextInput > div > div {
-        background-color: #162035 !important;
-        border: 1.5px solid #2e4a7a !important;
-        border-radius: 8px !important;
-    }
-    /* The actual <input> element */
-    .stTextInput > div > div > input {
-        background-color: #162035 !important;
-        color: #e8eeff !important;
-        -webkit-text-fill-color: #e8eeff !important;
-        caret-color: #4f8ef7 !important;
-        font-size: 14px !important;
-        border: none !important;
-        outline: none !important;
-        box-shadow: none !important;
-        padding: 10px 14px !important;
-    }
-    .stTextInput > div > div > input::placeholder {
-        color: #3d5a80 !important;
-        -webkit-text-fill-color: #3d5a80 !important;
-        opacity: 1 !important;
-    }
-    .stTextInput > div > div:focus-within {
-        border-color: #4f8ef7 !important;
-        box-shadow: 0 0 0 3px rgba(79,142,247,0.15) !important;
-    }
-    /* Input labels */
-    .stTextInput label {
-        color: #7a90b8 !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-    }
-    /* ALL buttons — white text */
-    .stButton > button {
-        color: #ffffff !important;
-        -webkit-text-fill-color: #ffffff !important;
-    }
-    /* Mode toggle buttons (inside columns) — ghost style */
-    div[data-testid="column"] .stButton > button {
-        background: transparent !important;
-        border: 1.5px solid #243858 !important;
-        color: #7a90b8 !important;
-        -webkit-text-fill-color: #7a90b8 !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        box-shadow: none !important;
-        transform: none !important;
-    }
-    div[data-testid="column"] .stButton > button:hover {
-        border-color: #4f8ef7 !important;
-        color: #e8eeff !important;
-        -webkit-text-fill-color: #e8eeff !important;
-        background: rgba(79,142,247,0.08) !important;
-        transform: none !important;
-        box-shadow: none !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    mode  = st.session_state.auth_mode
+    error = st.session_state.auth_error
+
+    login_display  = "block" if mode == "login"  else "none"
+    signup_display = "block" if mode == "signup" else "none"
+    ul_left_color  = "#4f8ef7" if mode == "login"  else "transparent"
+    ul_right_color = "#4f8ef7" if mode == "signup" else "transparent"
+    login_active   = "active" if mode == "login"  else ""
+    signup_active  = "active" if mode == "signup" else ""
+    error_html     = f'<div class="err">{error}</div>' if error else ""
+
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:transparent;font-family:'Inter',sans-serif;display:flex;justify-content:center;padding:16px 12px 28px}}
+.card{{width:100%;max-width:400px}}
+.brand{{text-align:center;padding:0 0 18px}}
+.brand h1{{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:#e8eeff;letter-spacing:-.04em;margin-bottom:5px}}
+.brand p{{color:#3d5070;font-size:11px;letter-spacing:.07em;text-transform:uppercase;font-family:'DM Mono',monospace}}
+hr{{border:none;border-top:1px solid #1c2d4a;margin:0 0 18px}}
+.tabs{{display:flex;gap:0;margin-bottom:4px}}
+.tab-btn{{flex:1;padding:10px;background:transparent;border:1.5px solid #243858;color:#7a90b8;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}}
+.tab-btn:first-child{{border-radius:8px 0 0 8px;border-right:none}}
+.tab-btn:last-child{{border-radius:0 8px 8px 0}}
+.tab-btn.active,.tab-btn:hover{{color:#e8eeff;border-color:#4f8ef7;background:rgba(79,142,247,.1)}}
+.underline{{display:flex;height:2px;margin-bottom:18px}}
+.ul-l{{flex:1;background:{ul_left_color};border-radius:2px}}
+.ul-r{{flex:1;background:{ul_right_color};border-radius:2px}}
+.err{{background:rgba(240,90,90,.12);border:1px solid rgba(240,90,90,.3);border-left:3px solid #f05a5a;color:#f08080;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px}}
+label{{display:block;color:#7a90b8;font-size:12.5px;font-weight:500;margin-bottom:5px;letter-spacing:.02em}}
+input[type=text],input[type=password]{{width:100%;background:#162035;border:1.5px solid #2e4a7a;border-radius:8px;color:#e8eeff;font-size:14px;font-family:'Inter',sans-serif;padding:11px 14px;margin-bottom:13px;outline:none;transition:border-color .15s,box-shadow .15s;-webkit-text-fill-color:#e8eeff;caret-color:#4f8ef7;display:block}}
+input::placeholder{{color:#3d5a80;-webkit-text-fill-color:#3d5a80;opacity:1}}
+input:focus{{border-color:#4f8ef7;box-shadow:0 0 0 3px rgba(79,142,247,.15)}}
+.btn{{width:100%;background:#4f8ef7;border:none;border-radius:8px;color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:13px;cursor:pointer;letter-spacing:.03em;margin-top:2px;transition:background .15s,transform .1s,box-shadow .15s;box-shadow:0 2px 14px rgba(79,142,247,.3)}}
+.btn:hover{{background:#3a75e0;transform:translateY(-1px);box-shadow:0 6px 22px rgba(79,142,247,.4)}}
+.btn:active{{transform:translateY(0)}}
+.footer{{text-align:center;color:#3d5070;font-size:11px;font-family:'DM Mono',monospace;margin-top:18px}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">
+    <h1>TaxMind AI</h1>
+    <p>Indian Tax Planning · FY 2026</p>
+  </div>
+  <hr>
+  <div class="tabs">
+    <button class="tab-btn {login_active}" onclick="switchMode('login')">Sign In</button>
+    <button class="tab-btn {signup_active}" onclick="switchMode('signup')">Create Account</button>
+  </div>
+  <div class="underline"><div class="ul-l"></div><div class="ul-r"></div></div>
+  {error_html}
+  <div id="lf" style="display:{login_display}">
+    <label>Username</label>
+    <input type="text" id="lu" placeholder="your_username" autocomplete="username">
+    <label>Password</label>
+    <input type="password" id="lp" placeholder="password" autocomplete="current-password">
+    <button class="btn" onclick="doLogin()">Sign In →</button>
+  </div>
+  <div id="sf" style="display:{signup_display}">
+    <label>Username</label>
+    <input type="text" id="su" placeholder="choose a username" autocomplete="username">
+    <label>Password</label>
+    <input type="password" id="sp" placeholder="min 6 characters" autocomplete="new-password">
+    <label>Confirm Password</label>
+    <input type="password" id="sc" placeholder="repeat password" autocomplete="new-password">
+    <button class="btn" onclick="doSignup()">Create Account →</button>
+  </div>
+  <div class="footer">Data stored locally · FY 2026 · AI-powered tax advice</div>
+</div>
+<script>
+function switchMode(m){{
+  window.parent.location.href='?action=mode&m='+m;
+}}
+function doLogin(){{
+  var u=document.getElementById('lu').value.trim();
+  var p=document.getElementById('lp').value;
+  if(!u||!p){{alert('Please fill in both fields.');return;}}
+  window.parent.location.href='?action=login&u='+encodeURIComponent(u)+'&p='+encodeURIComponent(p);
+}}
+function doSignup(){{
+  var u=document.getElementById('su').value.trim();
+  var p=document.getElementById('sp').value;
+  var c=document.getElementById('sc').value;
+  if(!u||!p){{alert('Username and password are required.');return;}}
+  if(p!==c){{alert('Passwords do not match.');return;}}
+  if(p.length<6){{alert('Password must be at least 6 characters.');return;}}
+  window.parent.location.href='?action=signup&u='+encodeURIComponent(u)+'&p='+encodeURIComponent(p)+'&c='+encodeURIComponent(c);
+}}
+</script>
+</body>
+</html>"""
 
     _, col, _ = st.columns([1, 1.6, 1])
     with col:
-        # ── Brand ─────────────────────────────────────────────────────────
-        st.markdown("""
-        <div style="text-align:center;padding:2.5rem 0 1.2rem 0;">
-            <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;
-                        color:#e8eeff;letter-spacing:-.04em;">TaxMind AI</div>
-            <p style="color:#3d5070;font-size:12px;margin:.5rem 0 0 0;letter-spacing:.07em;
-                      text-transform:uppercase;font-family:'DM Mono',monospace;">
-                Indian Tax Planning · FY 2026
-            </p>
-        </div>
-        <hr style="border-color:#1c2d4a;margin:0 0 1.2rem 0;">
-        """, unsafe_allow_html=True)
-
-        # ── Mode toggle ────────────────────────────────────────────────────
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button("Sign In", key="mode_login", use_container_width=True):
-                st.session_state.auth_mode  = "login"
-                st.session_state.auth_error = ""
-                st.rerun()
-        with c2:
-            if st.button("Create Account", key="mode_signup", use_container_width=True):
-                st.session_state.auth_mode  = "signup"
-                st.session_state.auth_error = ""
-                st.rerun()
-
-        # Active tab underline
-        mode = st.session_state.auth_mode
-        st.markdown(f"""
-        <div style="display:flex;margin-top:-8px;margin-bottom:20px;">
-            <div style="height:2px;width:{'50%' if mode=='login' else '0%'};
-                        background:#4f8ef7;border-radius:2px;"></div>
-            <div style="height:2px;width:{'50%' if mode=='signup' else '0%'};
-                        background:#4f8ef7;border-radius:2px;margin-left:auto;"></div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Error message
-        if st.session_state.auth_error:
-            st.error(st.session_state.auth_error)
-
-        # ── LOGIN form ─────────────────────────────────────────────────────
-        if mode == "login":
-            username = st.text_input("Username", placeholder="your_username", key="li_user")
-            password = st.text_input("Password", type="password", placeholder="password", key="li_pass")
-            st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
-
-            if st.button("Sign In →", key="btn_login", use_container_width=True):
-                if not username or not password:
-                    st.session_state.auth_error = "Please enter your username and password."
-                    st.rerun()
-                else:
-                    row = authenticate_user(username, password)
-                    if row:
-                        st.session_state.auth_error = ""
-                        _load_session_from_row(row)
-                        st.rerun()
-                    else:
-                        st.session_state.auth_error = t("invalid_credentials")
-                        st.rerun()
-
-        # ── SIGNUP form ────────────────────────────────────────────────────
-        else:
-            new_username = st.text_input("Username", placeholder="choose a username", key="su_user")
-            new_password = st.text_input("Password", type="password", placeholder="min 6 characters", key="su_pass")
-            confirm_pw   = st.text_input("Confirm Password", type="password", placeholder="repeat password", key="su_conf")
-            st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
-
-            if st.button("Create Account →", key="btn_signup", use_container_width=True):
-                if not new_username or not new_password:
-                    st.session_state.auth_error = "Username and password are required."
-                    st.rerun()
-                elif new_password != confirm_pw:
-                    st.session_state.auth_error = "Passwords do not match."
-                    st.rerun()
-                elif len(new_password) < 6:
-                    st.session_state.auth_error = "Password must be at least 6 characters."
-                    st.rerun()
-                else:
-                    success = create_user(new_username, new_password)
-                    if success:
-                        row = authenticate_user(new_username, new_password)
-                        if row:
-                            st.session_state.auth_error = ""
-                            _load_session_from_row(row)
-                            st.rerun()
-                    else:
-                        st.session_state.auth_error = t("username_taken")
-                        st.rerun()
-
-        st.markdown("""
-        <p style="text-align:center;color:#3d5070;font-size:11px;margin-top:1.5rem;
-                  font-family:'DM Mono',monospace;">
-            Data stored locally · FY 2026 · AI-powered tax advice
-        </p>
-        """, unsafe_allow_html=True)
+        components.html(html, height=600, scrolling=False)
 
 
-# ── Profile wizard ─────────────────────────────────────────────────────────────
 def render_wizard():
     inject_theme()
     _, col, _ = st.columns([1, 2, 1])
@@ -259,7 +246,6 @@ def render_wizard():
                 st.rerun()
 
 
-# ── Home page ──────────────────────────────────────────────────────────────────
 def render_home():
     inject_theme()
 
@@ -314,7 +300,6 @@ def render_home():
     """, unsafe_allow_html=True)
 
 
-# ── Router ─────────────────────────────────────────────────────────────────────
 if not st.session_state.logged_in:
     render_auth()
 elif st.session_state.setup_complete == 0:
