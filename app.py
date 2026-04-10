@@ -50,64 +50,15 @@ def _load_session_from_row(row):
 def render_auth():
     inject_theme()
 
-    # Force input visibility — overrides any theme CSS that hides fields
-    st.markdown("""
-    <style>
-    /* Nuclear input fix — these selectors cover every Streamlit/BaseWeb variant */
-    input, input[type="text"], input[type="password"], input[type="email"] {
-        background-color: #1a2744 !important;
-        color: #e8eeff !important;
-        border: 1.5px solid #3a5a8a !important;
-        border-radius: 8px !important;
-        padding: 8px 12px !important;
-        font-size: 14px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    input:focus, input[type="text"]:focus, input[type="password"]:focus {
-        border-color: #4f8ef7 !important;
-        outline: none !important;
-        box-shadow: 0 0 0 2px rgba(79,142,247,0.25) !important;
-    }
-    input::placeholder {
-        color: #4a6080 !important;
-        opacity: 1 !important;
-    }
-    /* BaseWeb container that wraps the input */
-    div[data-baseweb="input"],
-    div[data-baseweb="base-input"] {
-        background-color: #1a2744 !important;
-        border: 1.5px solid #3a5a8a !important;
-        border-radius: 8px !important;
-        min-height: 42px !important;
-    }
-    div[data-baseweb="input"]:focus-within,
-    div[data-baseweb="base-input"]:focus-within {
-        border-color: #4f8ef7 !important;
-        box-shadow: 0 0 0 2px rgba(79,142,247,0.25) !important;
-    }
-    /* Labels above inputs */
-    .stTextInput label, .stTextInput > label {
-        color: #7a90b8 !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        display: block !important;
-        margin-bottom: 4px !important;
-    }
-    /* Streamlit hides labels sometimes — force them visible */
-    .stTextInput [data-testid="stWidgetLabel"],
-    .stTextInput [data-testid="InputInstructions"] {
-        display: block !important;
-        visibility: visible !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    # Init form state
+    for k in ["auth_mode", "auth_username", "auth_password", "auth_confirm",
+              "auth_error", "auth_success"]:
+        if k not in st.session_state:
+            st.session_state[k] = "" if k != "auth_mode" else "login"
 
     _, col, _ = st.columns([1, 1.6, 1])
     with col:
+        # ── Brand header ──────────────────────────────────────────────────
         st.markdown("""
         <div style="text-align:center;padding:2.5rem 0 1.5rem 0;">
             <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;
@@ -117,50 +68,134 @@ def render_auth():
                 Indian Tax Planning · FY 2026
             </p>
         </div>
-        <hr style="border-color:#1c2d4a;margin:0 0 1.5rem 0;">
+        <hr style="border-color:#1c2d4a;margin:0 0 1.2rem 0;">
         """, unsafe_allow_html=True)
 
-        tab_login, tab_signup = st.tabs(["Sign In", "Create Account"])
+        # ── Mode toggle ───────────────────────────────────────────────────
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Sign In", key="mode_login", use_container_width=True):
+                st.session_state.auth_mode = "login"
+                st.session_state.auth_error = ""
+                st.session_state.auth_success = ""
+        with c2:
+            if st.button("Create Account", key="mode_signup", use_container_width=True):
+                st.session_state.auth_mode = "signup"
+                st.session_state.auth_error = ""
+                st.session_state.auth_success = ""
 
-        with tab_login:
-            st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
-            username = st.text_input("Username", key="login_username", placeholder="your_username")
-            password = st.text_input("Password", type="password", key="login_password", placeholder="password")
-            st.markdown("<div style='height:.3rem'></div>", unsafe_allow_html=True)
-            if st.button("Sign In", key="btn_login", use_container_width=True):
+        # Underline indicator
+        mode = st.session_state.auth_mode
+        left_w = "50%" if mode == "login" else "0%"
+        right_w = "0%" if mode == "login" else "50%"
+        st.markdown(f"""
+        <div style="display:flex;margin-top:-8px;margin-bottom:16px;">
+            <div style="height:2px;width:{left_w};background:#4f8ef7;
+                        border-radius:2px;transition:width .2s;"></div>
+            <div style="height:2px;width:{right_w};background:#4f8ef7;
+                        border-radius:2px;transition:width .2s;margin-left:auto;"></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # ── Feedback messages ─────────────────────────────────────────────
+        if st.session_state.auth_error:
+            st.error(st.session_state.auth_error)
+        if st.session_state.auth_success:
+            st.success(st.session_state.auth_success)
+
+        # ── Input fields — plain st. widgets with label ───────────────────
+        # We keep label_visibility="visible" so Streamlit renders the label
+        # which gives the field a visual anchor even if the box is invisible.
+        # The key trick: wrap each field in a container with a
+        # forced background via markdown ABOVE the widget.
+
+        def _field_bg():
+            """Inject a style block that forces the NEXT input to be visible.
+            Targets every known Streamlit input selector simultaneously."""
+            st.markdown("""
+            <style>
+            /* Force ALL inputs visible — belts AND suspenders */
+            .stTextInput input,
+            .stTextInput > div > div > input,
+            div[data-baseweb="input"] input,
+            div[data-baseweb="base-input"] input,
+            input[class*="st-"],
+            input {
+                background: #1a2a4a !important;
+                background-color: #1a2a4a !important;
+                color: #e8eeff !important;
+                border: 1.5px solid #2e4a7a !important;
+                border-radius: 8px !important;
+                font-size: 14px !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+            div[data-baseweb="input"],
+            div[data-baseweb="base-input"],
+            .stTextInput > div > div {
+                background: #1a2a4a !important;
+                background-color: #1a2a4a !important;
+                border: 1.5px solid #2e4a7a !important;
+                border-radius: 8px !important;
+            }
+            input::placeholder { color: #4a6080 !important; opacity:1 !important; }
+            input:focus { border-color: #4f8ef7 !important;
+                          box-shadow: 0 0 0 2px rgba(79,142,247,.2) !important; }
+            </style>
+            """, unsafe_allow_html=True)
+
+        if mode == "login":
+            _field_bg()
+            username = st.text_input("Username", key="li_user",
+                                     placeholder="your_username")
+            _field_bg()
+            password = st.text_input("Password", type="password",
+                                     key="li_pass", placeholder="password")
+            st.markdown("<div style='height:.4rem'></div>", unsafe_allow_html=True)
+            if st.button("Sign In →", key="btn_login", use_container_width=True):
                 if not username or not password:
-                    st.error("Please enter your username and password.")
+                    st.session_state.auth_error = "Please enter your username and password."
+                    st.rerun()
                 else:
                     row = authenticate_user(username, password)
                     if row:
                         _load_session_from_row(row)
                         st.rerun()
                     else:
-                        st.error(t("invalid_credentials"))
+                        st.session_state.auth_error = t("invalid_credentials")
+                        st.rerun()
 
-        with tab_signup:
-            st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
-            new_username = st.text_input("Username", key="signup_username", placeholder="choose_username")
-            new_password = st.text_input("Password", type="password", key="signup_password", placeholder="min 6 characters")
-            confirm_pw   = st.text_input("Confirm Password", type="password", key="signup_confirm", placeholder="repeat password")
-            st.markdown("<div style='height:.3rem'></div>", unsafe_allow_html=True)
-            if st.button("Create Account", key="btn_signup", use_container_width=True):
+        else:  # signup
+            _field_bg()
+            new_username = st.text_input("Username", key="su_user",
+                                         placeholder="choose a username")
+            _field_bg()
+            new_password = st.text_input("Password", type="password",
+                                         key="su_pass", placeholder="min 6 characters")
+            _field_bg()
+            confirm_pw = st.text_input("Confirm Password", type="password",
+                                       key="su_conf", placeholder="repeat password")
+            st.markdown("<div style='height:.4rem'></div>", unsafe_allow_html=True)
+            if st.button("Create Account →", key="btn_signup", use_container_width=True):
                 if not new_username or not new_password:
-                    st.error("Username and password are required.")
+                    st.session_state.auth_error = "Username and password are required."
+                    st.rerun()
                 elif new_password != confirm_pw:
-                    st.error("Passwords do not match.")
+                    st.session_state.auth_error = "Passwords do not match."
+                    st.rerun()
                 elif len(new_password) < 6:
-                    st.error("Password must be at least 6 characters.")
+                    st.session_state.auth_error = "Password must be at least 6 characters."
+                    st.rerun()
                 else:
                     success = create_user(new_username, new_password)
                     if success:
-                        st.success(t("signup_success"))
                         row = authenticate_user(new_username, new_password)
                         if row:
                             _load_session_from_row(row)
                             st.rerun()
                     else:
-                        st.error(t("username_taken"))
+                        st.session_state.auth_error = t("username_taken")
+                        st.rerun()
 
         st.markdown("""
         <p style="text-align:center;color:#3d5070;font-size:11px;margin-top:1.5rem;
