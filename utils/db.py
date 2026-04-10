@@ -207,6 +207,85 @@ def get_transactions(user_id: int, txn_type: str = None) -> list:
     return [dict(r) for r in rows]
 
 
+def seed_demo_data():
+    """
+    Insert a demo user (id=1) + 12 months of realistic transactions
+    if the DB is empty. Safe to call on every startup — no duplicates.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+
+    # Demo user
+    cur.execute("SELECT id FROM users WHERE id = 1")
+    if not cur.fetchone():
+        cur.execute("""
+            INSERT INTO users (id, username, password, name, employment_type,
+                               income_bracket, preferred_regime, language, setup_complete)
+            VALUES (1, 'demo', 'demo', 'Arjun Mehta', 'Salaried',
+                    '10L - 15L', 'new', 'en', 1)
+        """)
+
+    # Only seed transactions once
+    cur.execute("SELECT COUNT(*) as cnt FROM transactions WHERE user_id = 1")
+    if cur.fetchone()["cnt"] > 0:
+        conn.close()
+        return
+
+    import random
+    random.seed(42)
+
+    months = [
+        "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09",
+        "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03",
+    ]
+
+    income_entries = [
+        ("Salary credited - HDFC Payroll", 95000, "income"),
+        ("Freelance project - TechCorp", 18000, "income"),
+    ]
+
+    expense_entries = [
+        ("Zomato food order",         480,  "expense"),
+        ("Amazon shopping",           1200, "expense"),
+        ("Jio broadband recharge",    999,  "expense"),
+        ("Uber ride to office",       320,  "expense"),
+        ("Netflix subscription",      649,  "expense"),
+        ("Apollo pharmacy",           860,  "expense"),
+        ("Petrol refill",             1800, "expense"),
+        ("Swiggy dinner",             620,  "expense"),
+        ("SIP - Groww mutual fund",   5000, "expense"),
+        ("Electricity bill MSEB",     1450, "expense"),
+        ("Myntra clothing",           2200, "expense"),
+        ("PVR cinema",                700,  "expense"),
+        ("HDFC loan EMI",             8500, "expense"),
+        ("Airtel mobile recharge",    399,  "expense"),
+        ("Flipkart electronics",      3400, "expense"),
+    ]
+
+    rows = []
+    for month in months:
+        # Income (1-2 entries per month)
+        for desc, base_amt, txn_type in income_entries[:1 if random.random() > 0.4 else 2]:
+            amt = base_amt + random.randint(-3000, 3000)
+            day = random.randint(1, 5)
+            rows.append((1, f"{month}-{day:02d}", desc, amt, txn_type, categorize(desc)))
+
+        # Expenses (8-12 random entries per month)
+        sample = random.sample(expense_entries, k=random.randint(8, 12))
+        for desc, base_amt, txn_type in sample:
+            amt = round(base_amt * random.uniform(0.85, 1.2), 2)
+            day = random.randint(1, 28)
+            rows.append((1, f"{month}-{day:02d}", desc, amt, txn_type, categorize(desc)))
+
+    cur.executemany("""
+        INSERT INTO transactions (user_id, date, description, amount, type, category)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, rows)
+
+    conn.commit()
+    conn.close()
+
+
 def get_monthly_totals(user_id: int) -> list[dict]:
     """
     Returns list of {month, income, expense} aggregated by YYYY-MM.
