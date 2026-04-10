@@ -49,6 +49,63 @@ def _load_session_from_row(row):
 # ── Auth page ─────────────────────────────────────────────────────────────────
 def render_auth():
     inject_theme()
+
+    # Force input visibility — overrides any theme CSS that hides fields
+    st.markdown("""
+    <style>
+    /* Nuclear input fix — these selectors cover every Streamlit/BaseWeb variant */
+    input, input[type="text"], input[type="password"], input[type="email"] {
+        background-color: #1a2744 !important;
+        color: #e8eeff !important;
+        border: 1.5px solid #3a5a8a !important;
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        font-size: 14px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    input:focus, input[type="text"]:focus, input[type="password"]:focus {
+        border-color: #4f8ef7 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 2px rgba(79,142,247,0.25) !important;
+    }
+    input::placeholder {
+        color: #4a6080 !important;
+        opacity: 1 !important;
+    }
+    /* BaseWeb container that wraps the input */
+    div[data-baseweb="input"],
+    div[data-baseweb="base-input"] {
+        background-color: #1a2744 !important;
+        border: 1.5px solid #3a5a8a !important;
+        border-radius: 8px !important;
+        min-height: 42px !important;
+    }
+    div[data-baseweb="input"]:focus-within,
+    div[data-baseweb="base-input"]:focus-within {
+        border-color: #4f8ef7 !important;
+        box-shadow: 0 0 0 2px rgba(79,142,247,0.25) !important;
+    }
+    /* Labels above inputs */
+    .stTextInput label, .stTextInput > label {
+        color: #7a90b8 !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        display: block !important;
+        margin-bottom: 4px !important;
+    }
+    /* Streamlit hides labels sometimes — force them visible */
+    .stTextInput [data-testid="stWidgetLabel"],
+    .stTextInput [data-testid="InputInstructions"] {
+        display: block !important;
+        visibility: visible !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     _, col, _ = st.columns([1, 1.6, 1])
     with col:
         st.markdown("""
