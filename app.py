@@ -25,6 +25,8 @@ def _init_session():
         "language":         "en",
         "setup_complete":   0,
         "chat_history":     [],
+        "auth_mode":        "login",
+        "auth_error":       "",
     }
     for key, val in defaults.items():
         if key not in st.session_state:
@@ -50,18 +52,76 @@ def _load_session_from_row(row):
 def render_auth():
     inject_theme()
 
-    # Init form state
-    for k in ["auth_mode", "auth_error", "auth_success"]:
-        if k not in st.session_state:
-            st.session_state[k] = "" if k != "auth_mode" else "login"
+    # Nuclear-specificity CSS to force inputs visible in ALL Streamlit versions
+    st.markdown("""
+    <style>
+    /* Input wrapper */
+    .stTextInput > div > div {
+        background-color: #162035 !important;
+        border: 1.5px solid #2e4a7a !important;
+        border-radius: 8px !important;
+    }
+    /* The actual <input> element */
+    .stTextInput > div > div > input {
+        background-color: #162035 !important;
+        color: #e8eeff !important;
+        -webkit-text-fill-color: #e8eeff !important;
+        caret-color: #4f8ef7 !important;
+        font-size: 14px !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        padding: 10px 14px !important;
+    }
+    .stTextInput > div > div > input::placeholder {
+        color: #3d5a80 !important;
+        -webkit-text-fill-color: #3d5a80 !important;
+        opacity: 1 !important;
+    }
+    .stTextInput > div > div:focus-within {
+        border-color: #4f8ef7 !important;
+        box-shadow: 0 0 0 3px rgba(79,142,247,0.15) !important;
+    }
+    /* Input labels */
+    .stTextInput label {
+        color: #7a90b8 !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+    }
+    /* ALL buttons — white text */
+    .stButton > button {
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+    }
+    /* Mode toggle buttons (inside columns) — ghost style */
+    div[data-testid="column"] .stButton > button {
+        background: transparent !important;
+        border: 1.5px solid #243858 !important;
+        color: #7a90b8 !important;
+        -webkit-text-fill-color: #7a90b8 !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+    div[data-testid="column"] .stButton > button:hover {
+        border-color: #4f8ef7 !important;
+        color: #e8eeff !important;
+        -webkit-text-fill-color: #e8eeff !important;
+        background: rgba(79,142,247,0.08) !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
     _, col, _ = st.columns([1, 1.6, 1])
     with col:
-        # ── Brand header ──────────────────────────────────────────────────
+        # ── Brand ─────────────────────────────────────────────────────────
         st.markdown("""
-        <div style="text-align:center;padding:2.5rem 0 1.5rem 0;">
+        <div style="text-align:center;padding:2.5rem 0 1.2rem 0;">
             <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;
-                        color:#e8eeff;letter-spacing:-.04em;margin:0;">TaxMind AI</div>
+                        color:#e8eeff;letter-spacing:-.04em;">TaxMind AI</div>
             <p style="color:#3d5070;font-size:12px;margin:.5rem 0 0 0;letter-spacing:.07em;
                       text-transform:uppercase;font-family:'DM Mono',monospace;">
                 Indian Tax Planning · FY 2026
@@ -70,44 +130,39 @@ def render_auth():
         <hr style="border-color:#1c2d4a;margin:0 0 1.2rem 0;">
         """, unsafe_allow_html=True)
 
-        # ── Mode toggle ───────────────────────────────────────────────────
+        # ── Mode toggle ────────────────────────────────────────────────────
         c1, c2 = st.columns(2)
         with c1:
             if st.button("Sign In", key="mode_login", use_container_width=True):
-                st.session_state.auth_mode = "login"
+                st.session_state.auth_mode  = "login"
                 st.session_state.auth_error = ""
-                st.session_state.auth_success = ""
                 st.rerun()
         with c2:
             if st.button("Create Account", key="mode_signup", use_container_width=True):
-                st.session_state.auth_mode = "signup"
+                st.session_state.auth_mode  = "signup"
                 st.session_state.auth_error = ""
-                st.session_state.auth_success = ""
                 st.rerun()
 
-        # Underline indicator
+        # Active tab underline
         mode = st.session_state.auth_mode
-        left_w  = "50%" if mode == "login"  else "0%"
-        right_w = "0%"  if mode == "login"  else "50%"
         st.markdown(f"""
-        <div style="display:flex;margin-top:-8px;margin-bottom:16px;">
-            <div style="height:2px;width:{left_w};background:#4f8ef7;border-radius:2px;"></div>
-            <div style="height:2px;width:{right_w};background:#4f8ef7;border-radius:2px;margin-left:auto;"></div>
+        <div style="display:flex;margin-top:-8px;margin-bottom:20px;">
+            <div style="height:2px;width:{'50%' if mode=='login' else '0%'};
+                        background:#4f8ef7;border-radius:2px;"></div>
+            <div style="height:2px;width:{'50%' if mode=='signup' else '0%'};
+                        background:#4f8ef7;border-radius:2px;margin-left:auto;"></div>
         </div>
         """, unsafe_allow_html=True)
 
-        # ── Feedback messages ─────────────────────────────────────────────
-        if st.session_state.get("auth_error"):
+        # Error message
+        if st.session_state.auth_error:
             st.error(st.session_state.auth_error)
-        if st.session_state.get("auth_success"):
-            st.success(st.session_state.auth_success)
 
-        # ── Login form ────────────────────────────────────────────────────
+        # ── LOGIN form ─────────────────────────────────────────────────────
         if mode == "login":
-            username = st.text_input("Username", key="li_user", placeholder="your_username")
-            password = st.text_input("Password", type="password", key="li_pass", placeholder="password")
-
-            st.markdown("<div style='height:.4rem'></div>", unsafe_allow_html=True)
+            username = st.text_input("Username", placeholder="your_username", key="li_user")
+            password = st.text_input("Password", type="password", placeholder="password", key="li_pass")
+            st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
 
             if st.button("Sign In →", key="btn_login", use_container_width=True):
                 if not username or not password:
@@ -123,13 +178,12 @@ def render_auth():
                         st.session_state.auth_error = t("invalid_credentials")
                         st.rerun()
 
-        # ── Signup form ───────────────────────────────────────────────────
+        # ── SIGNUP form ────────────────────────────────────────────────────
         else:
-            new_username = st.text_input("Username", key="su_user", placeholder="choose a username")
-            new_password = st.text_input("Password", type="password", key="su_pass", placeholder="min 6 characters")
-            confirm_pw   = st.text_input("Confirm Password", type="password", key="su_conf", placeholder="repeat password")
-
-            st.markdown("<div style='height:.4rem'></div>", unsafe_allow_html=True)
+            new_username = st.text_input("Username", placeholder="choose a username", key="su_user")
+            new_password = st.text_input("Password", type="password", placeholder="min 6 characters", key="su_pass")
+            confirm_pw   = st.text_input("Confirm Password", type="password", placeholder="repeat password", key="su_conf")
+            st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
 
             if st.button("Create Account →", key="btn_signup", use_container_width=True):
                 if not new_username or not new_password:
@@ -221,21 +275,13 @@ def render_home():
     regime = "New Regime" if st.session_state.preferred_regime == "new" else "Old Regime"
 
     st.markdown(f"""
-    <div style="
-        background:linear-gradient(135deg, #0d1526 0%, #101e38 100%);
-        border:1px solid #1c2d4a;
-        border-left:3px solid #4f8ef7;
-        border-radius:16px;
-        padding:1.5rem 2rem;
-        margin-bottom:1.5rem;
-    ">
+    <div style="background:linear-gradient(135deg,#0d1526 0%,#101e38 100%);
+                border:1px solid #1c2d4a;border-left:3px solid #4f8ef7;
+                border-radius:16px;padding:1.5rem 2rem;margin-bottom:1.5rem;">
         <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;
-                    color:#e8eeff;margin-bottom:.35rem;">
-            Welcome back, {name}
-        </div>
+                    color:#e8eeff;margin-bottom:.35rem;">Welcome back, {name}</div>
         <p style="color:#7a90b8;font-size:13.5px;margin:0;line-height:1.65;">
-            {emp} &middot; {bkt} &middot; {regime} &mdash;
-            use the sidebar to navigate your dashboard.
+            {emp} &middot; {bkt} &middot; {regime} &mdash; use the sidebar to navigate.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -248,15 +294,12 @@ def render_home():
         ("Predictive Planning", "Year-end projection from monthly trends"),
         ("Upload Data",         "Add transactions manually or via CSV"),
     ]
-
     cols = st.columns(3)
     for i, (title, desc) in enumerate(pages):
         with cols[i % 3]:
             st.markdown(f"""
-            <div style="
-                background:#0d1526;border:1px solid #1c2d4a;border-radius:14px;
-                padding:1.1rem 1.2rem;margin-bottom:.75rem;min-height:90px;
-            ">
+            <div style="background:#0d1526;border:1px solid #1c2d4a;border-radius:14px;
+                        padding:1.1rem 1.2rem;margin-bottom:.75rem;min-height:90px;">
                 <div style="font-family:'Syne',sans-serif;font-weight:700;
                             font-size:.88rem;color:#e8eeff;margin-bottom:.25rem;">{title}</div>
                 <div style="color:#3d5070;font-size:11px;line-height:1.5;">{desc}</div>
