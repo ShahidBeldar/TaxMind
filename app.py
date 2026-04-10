@@ -51,8 +51,7 @@ def render_auth():
     inject_theme()
 
     # Init form state
-    for k in ["auth_mode", "auth_username", "auth_password", "auth_confirm",
-              "auth_error", "auth_success"]:
+    for k in ["auth_mode", "auth_error", "auth_success"]:
         if k not in st.session_state:
             st.session_state[k] = "" if k != "auth_mode" else "login"
 
@@ -78,80 +77,38 @@ def render_auth():
                 st.session_state.auth_mode = "login"
                 st.session_state.auth_error = ""
                 st.session_state.auth_success = ""
+                st.rerun()
         with c2:
             if st.button("Create Account", key="mode_signup", use_container_width=True):
                 st.session_state.auth_mode = "signup"
                 st.session_state.auth_error = ""
                 st.session_state.auth_success = ""
+                st.rerun()
 
         # Underline indicator
         mode = st.session_state.auth_mode
-        left_w = "50%" if mode == "login" else "0%"
-        right_w = "0%" if mode == "login" else "50%"
+        left_w  = "50%" if mode == "login"  else "0%"
+        right_w = "0%"  if mode == "login"  else "50%"
         st.markdown(f"""
         <div style="display:flex;margin-top:-8px;margin-bottom:16px;">
-            <div style="height:2px;width:{left_w};background:#4f8ef7;
-                        border-radius:2px;transition:width .2s;"></div>
-            <div style="height:2px;width:{right_w};background:#4f8ef7;
-                        border-radius:2px;transition:width .2s;margin-left:auto;"></div>
+            <div style="height:2px;width:{left_w};background:#4f8ef7;border-radius:2px;"></div>
+            <div style="height:2px;width:{right_w};background:#4f8ef7;border-radius:2px;margin-left:auto;"></div>
         </div>
         """, unsafe_allow_html=True)
 
         # ── Feedback messages ─────────────────────────────────────────────
-        if st.session_state.auth_error:
+        if st.session_state.get("auth_error"):
             st.error(st.session_state.auth_error)
-        if st.session_state.auth_success:
+        if st.session_state.get("auth_success"):
             st.success(st.session_state.auth_success)
 
-        # ── Input fields — plain st. widgets with label ───────────────────
-        # We keep label_visibility="visible" so Streamlit renders the label
-        # which gives the field a visual anchor even if the box is invisible.
-        # The key trick: wrap each field in a container with a
-        # forced background via markdown ABOVE the widget.
-
-        def _field_bg():
-            """Inject a style block that forces the NEXT input to be visible.
-            Targets every known Streamlit input selector simultaneously."""
-            st.markdown("""
-            <style>
-            /* Force ALL inputs visible — belts AND suspenders */
-            .stTextInput input,
-            .stTextInput > div > div > input,
-            div[data-baseweb="input"] input,
-            div[data-baseweb="base-input"] input,
-            input[class*="st-"],
-            input {
-                background: #1a2a4a !important;
-                background-color: #1a2a4a !important;
-                color: #e8eeff !important;
-                border: 1.5px solid #2e4a7a !important;
-                border-radius: 8px !important;
-                font-size: 14px !important;
-                opacity: 1 !important;
-                visibility: visible !important;
-            }
-            div[data-baseweb="input"],
-            div[data-baseweb="base-input"],
-            .stTextInput > div > div {
-                background: #1a2a4a !important;
-                background-color: #1a2a4a !important;
-                border: 1.5px solid #2e4a7a !important;
-                border-radius: 8px !important;
-            }
-            input::placeholder { color: #4a6080 !important; opacity:1 !important; }
-            input:focus { border-color: #4f8ef7 !important;
-                          box-shadow: 0 0 0 2px rgba(79,142,247,.2) !important; }
-            </style>
-            """, unsafe_allow_html=True)
-
+        # ── Login form ────────────────────────────────────────────────────
         if mode == "login":
-            _field_bg()
-            username = st.text_input("Username", key="li_user",
-                                     placeholder="your_username")
-            _field_bg()
-            password = st.text_input("Password", type="password",
-                                     key="li_pass", placeholder="password")
+            username = st.text_input("Username", key="li_user", placeholder="your_username")
+            password = st.text_input("Password", type="password", key="li_pass", placeholder="password")
+
             st.markdown("<div style='height:.4rem'></div>", unsafe_allow_html=True)
+
             if st.button("Sign In →", key="btn_login", use_container_width=True):
                 if not username or not password:
                     st.session_state.auth_error = "Please enter your username and password."
@@ -159,23 +116,21 @@ def render_auth():
                 else:
                     row = authenticate_user(username, password)
                     if row:
+                        st.session_state.auth_error = ""
                         _load_session_from_row(row)
                         st.rerun()
                     else:
                         st.session_state.auth_error = t("invalid_credentials")
                         st.rerun()
 
-        else:  # signup
-            _field_bg()
-            new_username = st.text_input("Username", key="su_user",
-                                         placeholder="choose a username")
-            _field_bg()
-            new_password = st.text_input("Password", type="password",
-                                         key="su_pass", placeholder="min 6 characters")
-            _field_bg()
-            confirm_pw = st.text_input("Confirm Password", type="password",
-                                       key="su_conf", placeholder="repeat password")
+        # ── Signup form ───────────────────────────────────────────────────
+        else:
+            new_username = st.text_input("Username", key="su_user", placeholder="choose a username")
+            new_password = st.text_input("Password", type="password", key="su_pass", placeholder="min 6 characters")
+            confirm_pw   = st.text_input("Confirm Password", type="password", key="su_conf", placeholder="repeat password")
+
             st.markdown("<div style='height:.4rem'></div>", unsafe_allow_html=True)
+
             if st.button("Create Account →", key="btn_signup", use_container_width=True):
                 if not new_username or not new_password:
                     st.session_state.auth_error = "Username and password are required."
@@ -191,6 +146,7 @@ def render_auth():
                     if success:
                         row = authenticate_user(new_username, new_password)
                         if row:
+                            st.session_state.auth_error = ""
                             _load_session_from_row(row)
                             st.rerun()
                     else:
@@ -249,11 +205,10 @@ def render_wizard():
                 st.rerun()
 
 
-# ── Home page (shown after login) ──────────────────────────────────────────────
+# ── Home page ──────────────────────────────────────────────────────────────────
 def render_home():
     inject_theme()
 
-    # Import shared sidebar — this is the ONLY sidebar rendered
     from utils.sidebar import render_sidebar
     render_sidebar()
 
