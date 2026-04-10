@@ -52,19 +52,14 @@ def _load_session_from_row(row):
 def render_auth():
     inject_theme()
 
-    # Force form inputs to be visible — targets st.form's rendered structure
     st.markdown("""
     <style>
-    /* Form container */
-    [data-testid="stForm"] {
-        background: #0d1526 !important;
-        border: 1px solid #1c2d4a !important;
-        border-radius: 14px !important;
-        padding: 1.5rem !important;
-    }
-    /* Every input inside forms */
-    [data-testid="stForm"] input {
-        background-color: #162035 !important;
+    /* ── Auth page: nuclear input fix ── */
+    .stTextInput input,
+    .stTextInput > div > div > input,
+    div[data-baseweb="input"] input,
+    div[data-baseweb="base-input"] input {
+        background-color: #132240 !important;
         color: #e8eeff !important;
         -webkit-text-fill-color: #e8eeff !important;
         caret-color: #4f8ef7 !important;
@@ -73,23 +68,34 @@ def render_auth():
         font-size: 14px !important;
         padding: 10px 14px !important;
     }
-    [data-testid="stForm"] input::placeholder {
-        color: #3d5a80 !important;
-        -webkit-text-fill-color: #3d5a80 !important;
+    div[data-baseweb="input"],
+    div[data-baseweb="base-input"],
+    .stTextInput > div > div {
+        background-color: #132240 !important;
+        border: 1.5px solid #2e4a7a !important;
+        border-radius: 8px !important;
     }
-    [data-testid="stForm"] input:focus {
+    .stTextInput input::placeholder {
+        color: #4a6080 !important;
+        -webkit-text-fill-color: #4a6080 !important;
+        opacity: 1 !important;
+    }
+    .stTextInput input:focus,
+    div[data-baseweb="input"]:focus-within,
+    div[data-baseweb="base-input"]:focus-within {
         border-color: #4f8ef7 !important;
-        box-shadow: 0 0 0 3px rgba(79,142,247,.15) !important;
+        box-shadow: 0 0 0 3px rgba(79,142,247,.18) !important;
     }
-    /* Labels */
-    [data-testid="stForm"] label {
-        color: #7a90b8 !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
+    /* Form card */
+    [data-testid="stForm"] {
+        background: #0d1526 !important;
+        border: 1px solid #1c2d4a !important;
+        border-radius: 14px !important;
+        padding: 1.5rem 1.5rem 1rem 1.5rem !important;
     }
-    /* Submit button inside form */
-    [data-testid="stForm"] button[type="submit"],
-    [data-testid="stForm"] .stButton > button {
+    /* Submit button */
+    [data-testid="stForm"] button[kind="primaryFormSubmit"],
+    [data-testid="stForm"] [data-testid="baseButton-primaryFormSubmit"] {
         background: #4f8ef7 !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
@@ -101,30 +107,17 @@ def render_auth():
         padding: 12px !important;
         box-shadow: 0 2px 14px rgba(79,142,247,.3) !important;
     }
-    [data-testid="stForm"] button[type="submit"]:hover,
-    [data-testid="stForm"] .stButton > button:hover {
-        background: #3a75e0 !important;
-        box-shadow: 0 6px 22px rgba(79,142,247,.4) !important;
+    /* Tab toggles — hide the actual Streamlit button chrome */
+    .auth-tab-row { display: flex; gap: 0; margin-bottom: 0; }
+    .auth-tab {
+        flex: 1; text-align: center; padding: 10px 0 12px 0;
+        font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+        color: #3d5070; cursor: pointer; border-bottom: 2px solid #1c2d4a;
+        letter-spacing: .02em; transition: color .15s, border-color .15s;
+        user-select: none;
     }
-    /* Mode toggle buttons */
-    div[data-testid="column"] .stButton > button {
-        background: transparent !important;
-        border: 1.5px solid #243858 !important;
-        color: #7a90b8 !important;
-        -webkit-text-fill-color: #7a90b8 !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        box-shadow: none !important;
-        transform: none !important;
-    }
-    div[data-testid="column"] .stButton > button:hover {
-        border-color: #4f8ef7 !important;
-        color: #e8eeff !important;
-        -webkit-text-fill-color: #e8eeff !important;
-        background: rgba(79,142,247,.08) !important;
-        transform: none !important;
-        box-shadow: none !important;
-    }
+    .auth-tab.active { color: #e8eeff; border-bottom-color: #4f8ef7; }
+    .auth-tab:not(.active):hover { color: #7a90b8; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -132,39 +125,43 @@ def render_auth():
     with col:
         # Brand header
         st.markdown("""
-        <div style="text-align:center;padding:2.5rem 0 1.2rem 0;">
-            <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;
+        <div style="text-align:center;padding:2.5rem 0 1.4rem 0;">
+            <div style="font-family:'Syne',sans-serif;font-size:2.1rem;font-weight:800;
                         color:#e8eeff;letter-spacing:-.04em;">TaxMind AI</div>
-            <p style="color:#3d5070;font-size:12px;margin:.5rem 0 0 0;letter-spacing:.07em;
+            <p style="color:#3d5070;font-size:11.5px;margin:.5rem 0 0 0;letter-spacing:.08em;
                       text-transform:uppercase;font-family:'DM Mono',monospace;">
                 Indian Tax Planning · FY 2026
             </p>
         </div>
-        <hr style="border-color:#1c2d4a;margin:0 0 1.2rem 0;">
         """, unsafe_allow_html=True)
 
-        # Mode toggle
+        # Tab-style mode toggle — rendered as HTML, backed by invisible st.buttons
+        mode = st.session_state.auth_mode
+        login_cls  = "auth-tab active" if mode == "login"  else "auth-tab"
+        signup_cls = "auth-tab active" if mode == "signup" else "auth-tab"
+        st.markdown(f"""
+        <div class="auth-tab-row">
+            <div class="{login_cls}"  onclick="window.parent.document.querySelectorAll('[data-testid=stButton] button')[0].click()">Sign In</div>
+            <div class="{signup_cls}" onclick="window.parent.document.querySelectorAll('[data-testid=stButton] button')[1].click()">Create Account</div>
+        </div>
+        <div style="height:20px"></div>
+        """, unsafe_allow_html=True)
+
+        # Hidden backing buttons (zero-height, zero-opacity)
+        st.markdown("""<div style="height:0;overflow:hidden;opacity:0;position:absolute;pointer-events:none;">""",
+                    unsafe_allow_html=True)
         c1, c2 = st.columns(2)
         with c1:
-            if st.button("Sign In", key="mode_login", use_container_width=True):
+            if st.button("Sign In", key="mode_login"):
                 st.session_state.auth_mode  = "login"
                 st.session_state.auth_error = ""
                 st.rerun()
         with c2:
-            if st.button("Create Account", key="mode_signup", use_container_width=True):
+            if st.button("Create Account", key="mode_signup"):
                 st.session_state.auth_mode  = "signup"
                 st.session_state.auth_error = ""
                 st.rerun()
-
-        mode = st.session_state.auth_mode
-        st.markdown(f"""
-        <div style="display:flex;margin-top:-8px;margin-bottom:20px;">
-            <div style="height:2px;width:{'50%' if mode=='login' else '0%'};
-                        background:#4f8ef7;border-radius:2px;"></div>
-            <div style="height:2px;width:{'50%' if mode=='signup' else '0%'};
-                        background:#4f8ef7;border-radius:2px;margin-left:auto;"></div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
         if st.session_state.auth_error:
             st.error(st.session_state.auth_error)
