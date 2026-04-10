@@ -161,7 +161,6 @@ if calc_clicked and gross_income > 0:
             **PLOTLY_LAYOUT,
             showlegend=True,
             height=300,
-            legend=dict(orientation="h", y=-0.08, x=0.5, xanchor="center"),
             annotations=[dict(
                 text=f"<b>Rs. {result['total_tax_payable']:,.0f}</b><br><span style='font-size:11px'>total tax</span>",
                 x=0.5, y=0.5,
@@ -169,6 +168,7 @@ if calc_clicked and gross_income > 0:
                 showarrow=False,
             )],
         )
+        fig_donut.update_layout(legend=dict(orientation="h", y=-0.08, x=0.5, xanchor="center"))
         st.plotly_chart(fig_donut, use_container_width=True)
 
     with ch2:
